@@ -78,43 +78,11 @@ export interface DecisionResult {
     solution_label: string;
 }
 
-export type WheelCategory =
-    | 'lucky_pack'
-    | 'pack_quiz'
-    | 'pack_challenge'
-    | 'pack_smart'
-    | 'mystery_pack'
-    | 'spin_again'
-    | 'bonus_pack'
-    | 'jackpot';
-
-export interface WheelSegmentSummary {
-    id: number;
-    category: WheelCategory;
-    label: string;
-}
-
-export interface WheelContent {
-    segments: WheelSegmentSummary[];
-}
-
-export interface WheelSpinContent {
-    question?: string;
-    options?: string[];
-    challenge?: string;
-    insight?: string;
-}
+export type WheelOutcome = 'win' | 'bomb';
 
 export interface WheelSpinResult {
     id: number;
-    category: WheelCategory;
-    label: string;
+    outcome: WheelOutcome;
     reward_label: string | null;
-    content: WheelSpinContent;
-}
-
-export interface WheelAnswerResult {
-    is_correct: boolean;
-    correct_index: number | null;
-    insight: string | null;
+    message: string;
 }

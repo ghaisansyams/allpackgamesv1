@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\WheelSpinController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/content/decision-lab', [ContentController::class, 'decisionLab']);
-Route::get('/content/wheel', [ContentController::class, 'wheel']);
 
 Route::post('/visitors', [VisitorController::class, 'store']);
 
@@ -18,5 +17,4 @@ Route::post('/decision-sessions/{decisionSession}/decision', [DecisionSessionCon
 Route::post('/decision-sessions/{decisionSession}/handoff', [DecisionSessionController::class, 'handoff']);
 
 Route::post('/wheel/spins', [WheelSpinController::class, 'store']);
-Route::post('/wheel/spins/{wheelSpin}/answer', [WheelSpinController::class, 'answer']);
 Route::post('/wheel/spins/{wheelSpin}/handoff', [WheelSpinController::class, 'handoff']);

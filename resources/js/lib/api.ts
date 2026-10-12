@@ -3,8 +3,6 @@ import type {
     DecisionResult,
     DecisionSession,
     Visitor,
-    WheelAnswerResult,
-    WheelContent,
     WheelSpinResult,
     PackagingOptionChoice,
 } from '@/types/content';
@@ -13,7 +11,6 @@ const api = () => window.axios;
 
 export const ContentApi = {
     decisionLab: () => api().get<DecisionLabContent>('/api/content/decision-lab').then((r) => r.data),
-    wheel: () => api().get<WheelContent>('/api/content/wheel').then((r) => r.data),
 };
 
 export const VisitorApi = {
@@ -60,11 +57,6 @@ export const WheelApi = {
         api()
             .post<{ spin: WheelSpinResult }>('/api/wheel/spins', { visitor_id: visitorId })
             .then((r) => r.data.spin),
-
-    answer: (spinId: number, selectedIndex: number) =>
-        api()
-            .post<WheelAnswerResult>(`/api/wheel/spins/${spinId}/answer`, { selected_index: selectedIndex })
-            .then((r) => r.data),
 
     handoff: (
         spinId: number,

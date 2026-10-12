@@ -133,18 +133,21 @@ class ContentSeeder extends Seeder
             }
         }
 
+        // Eight equal physical wedges, all rendered as an identical mystery box on the
+        // frontend: exactly one is the prize, the other seven are "bombs" (a miss). Nothing
+        // in the content here is ever shown before the spin resolves.
         $wheelSegments = [
-            ['category' => 'lucky_pack', 'label' => 'Lucky Pack', 'weight' => 15, 'reward_label' => 'ALLPACK Merchandise', 'content' => ['insight' => "You've won exclusive ALLPACK merchandise! Our packaging solutions keep products fresh from production to shelf."], 'sort_order' => 1],
-            ['category' => 'pack_quiz', 'label' => 'Pack Quiz', 'weight' => 20, 'reward_label' => null, 'content' => ['question' => 'Which packaging material is compostable, recyclable, and microwave-safe?', 'options' => ['Plastic Pouch', 'Foopak Bio Natura Paperboard', 'Aluminum Can', 'Glass Jar'], 'correct_index' => 1, 'insight' => 'Foopak Bio Natura combines compostability, recyclability, and microwave safety — a true sustainable packaging solution.'], 'sort_order' => 2],
-            ['category' => 'pack_challenge', 'label' => 'Pack Challenge', 'weight' => 15, 'reward_label' => null, 'content' => ['challenge' => 'Name one benefit of vacuum sealing for food packaging.', 'insight' => 'Vacuum sealing removes air to extend shelf life and protect against oxidation and moisture.'], 'sort_order' => 3],
-            ['category' => 'pack_smart', 'label' => 'Pack Smart', 'weight' => 15, 'reward_label' => null, 'content' => ['insight' => 'Did you know? Choosing the right packaging material can reduce product spoilage by up to 30% during distribution.'], 'sort_order' => 4],
-            ['category' => 'mystery_pack', 'label' => 'Mystery Pack', 'weight' => 10, 'reward_label' => 'Surprise Reveal', 'content' => ['insight' => 'Every Mystery Pack reveals a different ALLPACK packaging innovation — this time: Stand-Up Pouch technology.'], 'sort_order' => 5],
-            ['category' => 'spin_again', 'label' => 'Spin Again', 'weight' => 10, 'reward_label' => null, 'content' => ['insight' => 'One more spin! Give it another go.'], 'sort_order' => 6],
-            ['category' => 'bonus_pack', 'label' => 'Bonus Pack', 'weight' => 10, 'reward_label' => 'ALLPACK Catalog', 'content' => ['insight' => 'Bonus reward unlocked — explore our full packaging solutions catalog.'], 'sort_order' => 7],
-            ['category' => 'jackpot', 'label' => 'Jackpot', 'weight' => 5, 'reward_label' => 'ALLPACK Premium Hamper', 'content' => ['insight' => "Jackpot! You've won our premium ALLPACK hamper — talk to our team to claim it."], 'sort_order' => 8],
+            ['outcome' => 'win', 'reward_label' => 'ALLPACK Prize', 'message' => "Congratulations! You've won a prize — show this screen to our booth crew to claim it.", 'sort_order' => 1],
+            ['outcome' => 'bomb', 'reward_label' => null, 'message' => 'Boom! Not a winner this time. Spin again or explore our packaging solutions.', 'sort_order' => 2],
+            ['outcome' => 'bomb', 'reward_label' => null, 'message' => 'So close! Try another spin, or talk to our team about your packaging needs.', 'sort_order' => 3],
+            ['outcome' => 'bomb', 'reward_label' => null, 'message' => 'No luck this round. Give it another spin!', 'sort_order' => 4],
+            ['outcome' => 'bomb', 'reward_label' => null, 'message' => 'Missed it! One more spin could be the one.', 'sort_order' => 5],
+            ['outcome' => 'bomb', 'reward_label' => null, 'message' => 'Not this time — but our packaging experts are ready to chat.', 'sort_order' => 6],
+            ['outcome' => 'bomb', 'reward_label' => null, 'message' => 'Almost! Spin again for another shot at the prize.', 'sort_order' => 7],
+            ['outcome' => 'bomb', 'reward_label' => null, 'message' => 'No prize this time. Try once more!', 'sort_order' => 8],
         ];
         foreach ($wheelSegments as $segment) {
-            WheelSegment::updateOrCreate(['category' => $segment['category']], $segment);
+            WheelSegment::updateOrCreate(['sort_order' => $segment['sort_order']], $segment);
         }
     }
 }

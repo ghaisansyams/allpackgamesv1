@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('visitor_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('wheel_segment_id')->constrained()->cascadeOnDelete();
-            $table->boolean('is_correct')->nullable();
             $table->timestamp('handoff_requested_at')->nullable();
             $table->timestamps();
         });

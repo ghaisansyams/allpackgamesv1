@@ -3,33 +3,16 @@
 namespace App\Services;
 
 use App\Models\WheelSegment;
-use Illuminate\Support\Collection;
 
 class WheelSpinService
 {
     /**
-     * Pick a segment using weighted random selection over all segments' `weight` column.
+     * Every wedge is an equally likely physical slot on the wheel (true 1-in-N odds, not a
+     * weighted probability), matching a real wheel where one wedge is the prize and the rest
+     * are bombs.
      */
     public function spin(): WheelSegment
     {
-        $segments = WheelSegment::all();
-
-        return $this->pickWeighted($segments);
-    }
-
-    private function pickWeighted(Collection $segments): WheelSegment
-    {
-        $totalWeight = $segments->sum('weight');
-        $roll = random_int(1, max($totalWeight, 1));
-
-        $cumulative = 0;
-        foreach ($segments as $segment) {
-            $cumulative += $segment->weight;
-            if ($roll <= $cumulative) {
-                return $segment;
-            }
-        }
-
-        return $segments->last();
+        return WheelSegment::inRandomOrder()->firstOrFail();
     }
 }

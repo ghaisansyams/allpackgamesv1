@@ -10,18 +10,9 @@ class WheelSegment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category',
-        'label',
-        'weight',
+        'outcome',
         'reward_label',
-        'content',
+        'message',
         'sort_order',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'content' => 'array',
-        ];
-    }
 }

@@ -26,41 +26,14 @@ class WheelSpinController extends Controller
             'wheel_segment_id' => $segment->id,
         ]);
 
-        $content = $segment->content ?? [];
-        // The correct answer for a quiz segment is withheld until the visitor submits
-        // their answer via `answer()`, otherwise the touch screen would leak it in the DOM.
-        if ($segment->category === 'pack_quiz') {
-            unset($content['correct_index']);
-        }
-
         return response()->json([
             'spin' => [
                 'id' => $spin->id,
-                'category' => $segment->category,
-                'label' => $segment->label,
+                'outcome' => $segment->outcome,
                 'reward_label' => $segment->reward_label,
-                'content' => $content,
+                'message' => $segment->message,
             ],
         ], 201);
-    }
-
-    public function answer(Request $request, WheelSpin $wheelSpin): JsonResponse
-    {
-        $data = $request->validate([
-            'selected_index' => ['required', 'integer', 'min:0'],
-        ]);
-
-        $segment = $wheelSpin->wheelSegment;
-        $correctIndex = $segment->content['correct_index'] ?? null;
-        $isCorrect = $correctIndex !== null && (int) $data['selected_index'] === (int) $correctIndex;
-
-        $wheelSpin->update(['is_correct' => $isCorrect]);
-
-        return response()->json([
-            'is_correct' => $isCorrect,
-            'correct_index' => $correctIndex,
-            'insight' => $segment->content['insight'] ?? null,
-        ]);
     }
 
     public function handoff(Request $request, WheelSpin $wheelSpin): JsonResponse

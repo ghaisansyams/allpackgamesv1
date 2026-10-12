@@ -13,14 +13,12 @@ class WheelSpin extends Model
     protected $fillable = [
         'visitor_id',
         'wheel_segment_id',
-        'is_correct',
         'handoff_requested_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_correct' => 'boolean',
             'handoff_requested_at' => 'datetime',
         ];
     }
