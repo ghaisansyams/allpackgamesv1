@@ -3,6 +3,7 @@ import TouchButton from '@/Components/Kiosk/TouchButton';
 import StepHeader from '@/Components/Kiosk/StepHeader';
 import SelectCard from '@/Components/Kiosk/SelectCard';
 import ScoreDots from '@/Components/Kiosk/ScoreDots';
+import CountdownBar from '@/Components/Kiosk/CountdownBar';
 import Icon from '@/lib/icons';
 import { ContentApi, DecisionSessionApi, VisitorApi } from '@/lib/api';
 import VisitorDataStage, { VisitorFormData } from './VisitorDataStage';
@@ -18,6 +19,10 @@ import type {
 } from '@/types/content';
 
 type Stage = 'loading' | 'visitor' | 'start' | 'business_case' | 'market' | 'priorities' | 'decision' | 'result';
+
+// Generic packaging product cutouts, assigned by option position (A/B/C) rather than by
+// business case content — a placeholder visual treatment until case-specific photography exists.
+const OPTION_IMAGES = ['/images/packaging/option-a.png', '/images/packaging/option-b.png', '/images/packaging/option-c.png'];
 
 export default function DecisionLabExperience({ onExit }: { onExit: () => void }) {
     const [stage, setStage] = useState<Stage>('loading');
@@ -139,6 +144,8 @@ export default function DecisionLabExperience({ onExit }: { onExit: () => void }
                 <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-center text-red-700">{error}</p>
             )}
 
+            {stage !== 'result' && <CountdownBar totalSeconds={180} dangerSeconds={25} />}
+
             {stage === 'visitor' && (
                 <VisitorDataStage onSubmit={handleVisitorSubmit} submitting={submitting} />
             )}
@@ -234,6 +241,11 @@ export default function DecisionLabExperience({ onExit }: { onExit: () => void }
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         {options.map((option, i) => (
                             <div key={option.id} className="flex flex-col gap-4 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow">
+                                <img
+                                    src={OPTION_IMAGES[i % OPTION_IMAGES.length]}
+                                    alt=""
+                                    className="h-32 w-full object-contain"
+                                />
                                 <div>
                                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-700 font-bold text-white">
                                         {String.fromCharCode(65 + i)}

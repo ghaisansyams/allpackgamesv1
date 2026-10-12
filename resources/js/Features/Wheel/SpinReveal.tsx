@@ -48,9 +48,7 @@ export default function SpinReveal({
                             {answer.is_correct ? 'Correct! 🎉' : 'Good try!'}
                         </p>
                         <p className="text-slate-200">{answer.insight}</p>
-                        <TouchButton className="mt-8" onClick={onContinue}>
-                            Continue
-                        </TouchButton>
+                        <NextActions onSpinAgain={onSpinAgain} onContinue={onContinue} />
                     </div>
                 )}
             </RevealShell>
@@ -66,9 +64,7 @@ export default function SpinReveal({
                 ) : (
                     <div>
                         <p className="text-slate-200">{spin.content.insight}</p>
-                        <TouchButton className="mt-8" onClick={onContinue}>
-                            Continue
-                        </TouchButton>
+                        <NextActions onSpinAgain={onSpinAgain} onContinue={onContinue} />
                     </div>
                 )}
             </RevealShell>
@@ -79,10 +75,19 @@ export default function SpinReveal({
     return (
         <RevealShell title={spin.reward_label ?? spin.label}>
             <p className="text-xl text-slate-200">{spin.content.insight}</p>
-            <TouchButton className="mt-8" onClick={onContinue}>
-                Continue
-            </TouchButton>
+            <NextActions onSpinAgain={onSpinAgain} onContinue={onContinue} />
         </RevealShell>
+    );
+}
+
+function NextActions({ onSpinAgain, onContinue }: { onSpinAgain: () => void; onContinue: () => void }) {
+    return (
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <TouchButton variant="ghost" onClick={onSpinAgain}>
+                Spin Again
+            </TouchButton>
+            <TouchButton onClick={onContinue}>Claim & Fill My Details</TouchButton>
+        </div>
     );
 }
 
