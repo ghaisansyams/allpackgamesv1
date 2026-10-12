@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import TouchButton from '@/Components/Kiosk/TouchButton';
 import StepHeader from '@/Components/Kiosk/StepHeader';
 import SelectCard from '@/Components/Kiosk/SelectCard';
-import ScoreDots from '@/Components/Kiosk/ScoreDots';
 import CountdownBar from '@/Components/Kiosk/CountdownBar';
 import Icon from '@/lib/icons';
 import { ContentApi, DecisionSessionApi, VisitorApi } from '@/lib/api';
@@ -144,7 +143,7 @@ export default function DecisionLabExperience({ onExit }: { onExit: () => void }
                 <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-center text-red-700">{error}</p>
             )}
 
-            {stage !== 'result' && <CountdownBar totalSeconds={180} dangerSeconds={25} />}
+            {stage !== 'visitor' && stage !== 'result' && <CountdownBar totalSeconds={180} dangerSeconds={25} />}
 
             {stage === 'visitor' && (
                 <VisitorDataStage onSubmit={handleVisitorSubmit} submitting={submitting} />
@@ -244,7 +243,7 @@ export default function DecisionLabExperience({ onExit }: { onExit: () => void }
                                 <img
                                     src={OPTION_IMAGES[i % OPTION_IMAGES.length]}
                                     alt=""
-                                    className="h-32 w-full object-contain"
+                                    className="h-40 w-full object-contain"
                                 />
                                 <div>
                                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-700 font-bold text-white">
@@ -252,11 +251,6 @@ export default function DecisionLabExperience({ onExit }: { onExit: () => void }
                                     </span>
                                     <p className="mt-2 font-bold text-slate-900">{option.label}</p>
                                     <p className="text-sm text-slate-600">{option.description}</p>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    {priorities.map((slug) => (
-                                        <ScoreDots key={slug} label={slug} value={option.scores[slug]} />
-                                    ))}
                                 </div>
                                 <TouchButton
                                     variant="secondary"
