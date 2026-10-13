@@ -70,6 +70,7 @@ export const MiniGameApi = {
 export interface LeaderboardEntry {
     name: string;
     game: string;
+    score: string;
 }
 
 export const LeaderboardApi = {

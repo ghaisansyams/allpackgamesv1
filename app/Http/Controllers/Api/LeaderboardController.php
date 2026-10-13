@@ -6,60 +6,102 @@ use App\Http\Controllers\Controller;
 use App\Models\MiniGameAttempt;
 use App\Models\WheelSpin;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 class LeaderboardController extends Controller
 {
-    private const GAME_LABELS = [
-        'memory_card' => 'Memory Match',
-        'puzzle' => 'Packaging Puzzle',
-        'stopwatch' => 'Stop at 10.00',
-        'recycle_rush' => 'Recycle Rush',
-    ];
-
     /**
-     * Recent winners across every game, shown on the idle screen to draw a crowd while the
-     * booth waits for its next visitor. Only attempts tied to a named visitor (i.e. after the
-     * QR/phone join) are eligible, so the board never shows a blank name.
+     * One "top score" entry per game, shown on the idle screen so visitors have a concrete
+     * record to beat instead of an empty board. Ranking is computed in PHP rather than SQL
+     * since `meta` is a JSON column whose shape differs per game, and the row counts here are
+     * small enough (booth demo scale) that this isn't a performance concern.
      */
     public function index(): JsonResponse
     {
-        $miniGameWins = MiniGameAttempt::query()
+        $entries = array_filter([
+            $this->bestStopwatch(),
+            $this->bestByMoves('memory_card', 'Memory Match'),
+            $this->bestByMoves('puzzle', 'Packaging Puzzle'),
+            $this->bestRecycleRush(),
+            $this->latestWheelWin(),
+        ]);
+
+        return response()->json(['entries' => array_values($entries)]);
+    }
+
+    private function bestStopwatch(): ?array
+    {
+        $best = MiniGameAttempt::query()
+            ->where('game', 'stopwatch')
             ->where('won', true)
             ->whereNotNull('visitor_id')
             ->with('visitor:id,name')
-            ->latest()
-            ->limit(10)
             ->get()
-            ->filter(fn (MiniGameAttempt $attempt) => $attempt->visitor !== null)
-            ->map(fn (MiniGameAttempt $attempt) => [
-                'name' => $attempt->visitor->name,
-                'game' => self::GAME_LABELS[$attempt->game] ?? ucfirst(str_replace('_', ' ', $attempt->game)),
-                'created_at' => $attempt->created_at,
-            ]);
+            ->filter(fn (MiniGameAttempt $a) => $a->visitor && isset($a->meta['stopped_at']))
+            ->sortBy(fn (MiniGameAttempt $a) => abs($a->meta['stopped_at'] - 10.0))
+            ->first();
 
-        $wheelWins = WheelSpin::query()
+        return $best ? [
+            'game' => 'Stop at 10.00',
+            'name' => $best->visitor->name,
+            'score' => number_format((float) $best->meta['stopped_at'], 2).'s',
+        ] : null;
+    }
+
+    private function bestByMoves(string $game, string $label): ?array
+    {
+        $best = MiniGameAttempt::query()
+            ->where('game', $game)
+            ->where('won', true)
+            ->whereNotNull('visitor_id')
+            ->with('visitor:id,name')
+            ->get()
+            ->filter(fn (MiniGameAttempt $a) => $a->visitor && isset($a->meta['moves']))
+            ->sortBy(fn (MiniGameAttempt $a) => $a->meta['moves'])
+            ->first();
+
+        return $best ? [
+            'game' => $label,
+            'name' => $best->visitor->name,
+            'score' => $best->meta['moves'].' moves',
+        ] : null;
+    }
+
+    private function bestRecycleRush(): ?array
+    {
+        // Every winner finishes at the same score (the round ends the instant it's reached),
+        // so time-to-win is the only metric that actually ranks anyone.
+        $best = MiniGameAttempt::query()
+            ->where('game', 'recycle_rush')
+            ->where('won', true)
+            ->whereNotNull('visitor_id')
+            ->with('visitor:id,name')
+            ->get()
+            ->filter(fn (MiniGameAttempt $a) => $a->visitor && isset($a->meta['seconds']))
+            ->sortBy(fn (MiniGameAttempt $a) => $a->meta['seconds'])
+            ->first();
+
+        return $best ? [
+            'game' => 'Recycle Rush',
+            'name' => $best->visitor->name,
+            'score' => $best->meta['seconds'].'s',
+        ] : null;
+    }
+
+    private function latestWheelWin(): ?array
+    {
+        // The wheel has no finer-grained score to rank by — win or bomb — so this shows the
+        // most recent winner instead of a "best" one.
+        $latest = WheelSpin::query()
             ->whereNotNull('visitor_id')
             ->whereHas('wheelSegment', fn ($query) => $query->where('outcome', 'win'))
             ->with('visitor:id,name')
             ->latest()
-            ->limit(10)
-            ->get()
-            ->filter(fn (WheelSpin $spin) => $spin->visitor !== null)
-            ->map(fn (WheelSpin $spin) => [
-                'name' => $spin->visitor->name,
-                'game' => 'Spin the Wheel',
-                'created_at' => $spin->created_at,
-            ]);
+            ->first();
 
-        /** @var Collection<int, array{name: string, game: string, created_at: Carbon}> $entries */
-        $entries = $miniGameWins->concat($wheelWins)
-            ->sortByDesc('created_at')
-            ->take(8)
-            ->values()
-            ->map(fn (array $entry) => ['name' => $entry['name'], 'game' => $entry['game']]);
-
-        return response()->json(['entries' => $entries]);
+        return $latest && $latest->visitor ? [
+            'game' => 'Spin the Wheel',
+            'name' => $latest->visitor->name,
+            'score' => 'Won a Prize!',
+        ] : null;
     }
 }
