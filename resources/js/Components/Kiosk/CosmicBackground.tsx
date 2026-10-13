@@ -14,13 +14,13 @@ export default function CosmicBackground({ className = '', children }: PropsWith
             <GameLogoStyles />
             <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:48px_48px]" />
 
-            {/* Sized in vmin (not vw) so these stay the same relative size whether the kiosk
-                is viewed tall-and-narrow (tablet/TV portrait) or wide-and-short (a laptop
-                browser) — vw alone would balloon on a wide landscape screen and wash the
-                whole page in color. */}
-            <div className="pointer-events-none absolute -left-1/4 -top-1/4 h-[60vmin] w-[60vmin] rounded-full bg-fuchsia-700/30 blur-[120px]" />
-            <div className="pointer-events-none absolute -right-1/4 top-1/3 h-[55vmin] w-[55vmin] rounded-full bg-amber-500/20 blur-[120px]" />
-            <div className="pointer-events-none absolute bottom-[-20%] left-1/3 h-[50vmin] w-[50vmin] rounded-full bg-indigo-700/30 blur-[120px]" />
+            {/* Fixed pixel sizes (not vw/vmin) so these render identically across devices —
+                viewport-relative units looked wildly different between a laptop window, an
+                iPad simulator, and a real Android tablet (differing CSS viewport/DPR
+                handling), sometimes washing the page in color, sometimes barely visible. */}
+            <div className="pointer-events-none absolute -left-1/4 -top-1/4 h-[480px] w-[480px] rounded-full bg-fuchsia-700/30 blur-[120px]" />
+            <div className="pointer-events-none absolute -right-1/4 top-1/3 h-[440px] w-[440px] rounded-full bg-amber-500/20 blur-[120px]" />
+            <div className="pointer-events-none absolute bottom-[-20%] left-1/3 h-[400px] w-[400px] rounded-full bg-indigo-700/30 blur-[120px]" />
 
             <div className="relative z-10">{children}</div>
         </div>

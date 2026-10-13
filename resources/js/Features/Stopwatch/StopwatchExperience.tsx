@@ -14,8 +14,20 @@ export default function StopwatchExperience({ visitorId, onBack }: { visitorId: 
     const [phase, setPhase] = useState<Phase>('idle');
     const [elapsed, setElapsed] = useState(0);
     const [finalElapsed, setFinalElapsed] = useState<number | null>(null);
+    const [showPopup, setShowPopup] = useState(false);
     const startRef = useRef(0);
     const frameRef = useRef<number>();
+
+    // Hold the result popup back for a beat so the stopped time is actually visible first —
+    // it used to cover the display the instant you hit Stop.
+    useEffect(() => {
+        if (phase !== 'result') {
+            setShowPopup(false);
+            return;
+        }
+        const timer = window.setTimeout(() => setShowPopup(true), 1800);
+        return () => window.clearTimeout(timer);
+    }, [phase]);
 
     useEffect(() => {
         if (phase !== 'running') return;
@@ -82,7 +94,7 @@ export default function StopwatchExperience({ visitorId, onBack }: { visitorId: 
                 </TouchButton>
             )}
 
-            {phase === 'result' && (
+            {phase === 'result' && showPopup && (
                 <GameResultPopup
                     won={won}
                     title={won ? 'Perfect Timing!' : 'So Close!'}

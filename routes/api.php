@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ContentController;
 use App\Http\Controllers\Api\DecisionSessionController;
+use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\MiniGameAttemptController;
 use App\Http\Controllers\Api\VisitorController;
 use App\Http\Controllers\Api\WheelSpinController;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/content/decision-lab', [ContentController::class, 'decisionLab']);
 Route::get('/content/wheel', [ContentController::class, 'wheel']);
+Route::get('/leaderboard', [LeaderboardController::class, 'index']);
 
 Route::post('/booth-sessions', [BoothSessionController::class, 'store']);
 Route::get('/booth-sessions/{token}', [BoothSessionController::class, 'show']);
