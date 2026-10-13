@@ -1,12 +1,14 @@
 const SLOT_COUNT = 8;
 
-// Vivid alternating palette purely for visual appeal — every wedge shows the identical
-// mystery box image regardless of color, so color carries no information about the outcome.
-const COLORS = ['#7c3aed', '#db2777', '#2563eb', '#ea580c', '#16a34a', '#ca8a04', '#0891b2', '#dc2626'];
+// Muted dark-neon alternating palette (two tones) purely for visual appeal — every wedge
+// shows the identical mystery box image regardless of color, so color carries no
+// information about the outcome.
+const COLORS = ['#3b2f63', '#2a2550'];
 
 const CENTER = 100;
 const RADIUS = 94;
-const IMAGE_RADIUS = 58;
+const IMAGE_RADIUS = 60;
+const IMAGE_SIZE = 30;
 const BULB_RADIUS = 97;
 
 /** Point on the wheel at `angleDeg` clockwise from the 12 o'clock position. */
@@ -24,16 +26,22 @@ export default function SpinWheel({ rotation, spinning }: { rotation: number; sp
     const bulbs = Array.from({ length: 16 }, (_, i) => i);
 
     return (
-        <div className="relative mx-auto h-[min(80vw,520px)] w-[min(80vw,520px)]">
-            <div className="absolute inset-[-6%] -z-10 rounded-full bg-gradient-to-br from-amber-400 via-fuchsia-500 to-indigo-600 opacity-40 blur-2xl" />
+        <div className="relative mx-auto h-[min(80vw,480px)] w-[min(80vw,480px)]">
+            <div className="absolute inset-[-8%] -z-10 rounded-full bg-gradient-to-br from-fuchsia-600 via-purple-700 to-indigo-900 opacity-50 blur-2xl" />
 
             <div
-                className="absolute left-1/2 top-[-18px] z-20 h-12 w-12 -translate-x-1/2 drop-shadow-lg"
-                style={{ clipPath: 'polygon(50% 100%, 0 0, 100% 0)', background: 'linear-gradient(180deg,#fde047,#f59e0b)' }}
+                className="absolute left-1/2 top-[-20px] z-20 h-11 w-9 -translate-x-1/2"
+                style={{
+                    clipPath: 'polygon(50% 100%, 10% 0, 90% 0)',
+                    background: 'transparent',
+                    border: '3px solid #f0abfc',
+                    filter: 'drop-shadow(0 0 6px #e879f9) drop-shadow(0 0 12px #c026d3)',
+                }}
             />
 
             <svg viewBox="0 0 200 200" className="h-full w-full overflow-visible rounded-full shadow-2xl">
-                <circle cx={CENTER} cy={CENTER} r={RADIUS + 5} fill="#1e1b4b" />
+                <circle cx={CENTER} cy={CENTER} r={RADIUS + 6} fill="#120f26" />
+                <circle cx={CENTER} cy={CENTER} r={RADIUS + 6} fill="none" stroke="#f0abfc" strokeWidth={0.6} opacity={0.5} />
 
                 {bulbs.map((i) => {
                     const angle = i * (360 / bulbs.length);
@@ -43,8 +51,9 @@ export default function SpinWheel({ rotation, spinning }: { rotation: number; sp
                             key={`bulb-${i}`}
                             cx={x}
                             cy={y}
-                            r={2.6}
-                            fill={i % 2 === 0 ? '#fde047' : '#fff7ed'}
+                            r={2.2}
+                            fill="#fdf4ff"
+                            style={{ filter: 'drop-shadow(0 0 3px #f0abfc)' }}
                             className={spinning ? 'animate-pulse' : ''}
                         />
                     );
@@ -61,7 +70,7 @@ export default function SpinWheel({ rotation, spinning }: { rotation: number; sp
                         const start = polar(RADIUS, i * segmentAngle);
                         const end = polar(RADIUS, (i + 1) * segmentAngle);
                         const d = `M ${CENTER} ${CENTER} L ${start.x} ${start.y} A ${RADIUS} ${RADIUS} 0 0 1 ${end.x} ${end.y} Z`;
-                        return <path key={i} d={d} fill={COLORS[i % COLORS.length]} stroke="#1e1b4b" strokeWidth={1.5} />;
+                        return <path key={i} d={d} fill={COLORS[i % COLORS.length]} stroke="#1a1533" strokeWidth={1} />;
                     })}
                     {slots.map((i) => {
                         const mid = i * segmentAngle + segmentAngle / 2;
@@ -70,18 +79,18 @@ export default function SpinWheel({ rotation, spinning }: { rotation: number; sp
                             <image
                                 key={`img-${i}`}
                                 href="/images/wheel/mystery-box.png"
-                                x={x - 22}
-                                y={y - 22}
-                                width={44}
-                                height={44}
-                                style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.5))' }}
+                                x={x - IMAGE_SIZE / 2}
+                                y={y - IMAGE_SIZE / 2}
+                                width={IMAGE_SIZE}
+                                height={IMAGE_SIZE}
+                                style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))' }}
                             />
                         );
                     })}
                 </g>
             </svg>
 
-            <div className="absolute inset-0 m-auto flex h-20 w-20 items-center justify-center rounded-full border-4 border-amber-400 bg-gradient-to-br from-indigo-700 to-fuchsia-700 text-sm font-black text-amber-300 shadow-lg">
+            <div className="absolute inset-0 m-auto flex h-[22%] w-[22%] items-center justify-center rounded-full bg-gradient-to-b from-white to-slate-200 text-sm font-black text-indigo-900 shadow-[0_0_20px_rgba(240,171,252,0.6)]">
                 SPIN
             </div>
         </div>
