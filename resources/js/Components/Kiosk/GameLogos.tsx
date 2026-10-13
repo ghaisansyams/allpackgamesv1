@@ -115,24 +115,15 @@ export function StopwatchLogo({ className = 'h-10 w-10' }: { className?: string 
     );
 }
 
-export function RecycleLogo({ className = 'h-10 w-10' }: { className?: string }) {
+export function SpotMissingLogo({ className = 'h-10 w-10' }: { className?: string }) {
     return (
         <svg viewBox="0 0 48 48" className={className}>
-            <circle cx="24" cy="24" r="21" fill="none" stroke="#fde68a" strokeWidth="1.5" opacity="0.4" />
-            <g style={{ transformOrigin: '24px 24px', animation: 'logo-spin 5s linear infinite' }}>
-                {[0, 120, 240].map((angle) => (
-                    <g key={angle} style={{ transform: `rotate(${angle}deg)`, transformOrigin: '24px 24px' }}>
-                        <path
-                            d="M24 10 L31 20 H26 A13 13 0 0 1 14 31"
-                            fill="none"
-                            stroke="#f59e0b"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                        />
-                        <path d="M27 16 L31 20 L27 24" fill="none" stroke="#dc2626" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                    </g>
-                ))}
+            <g style={{ transformOrigin: '20px 20px', animation: 'logo-tilt 2.2s ease-in-out infinite' }}>
+                <circle cx="20" cy="20" r="13" fill="none" stroke="#f59e0b" strokeWidth="4" />
+                <circle cx="20" cy="20" r="13" fill="#1a0a12" opacity="0.3" />
+                <path d="M15 20 h10 M20 15 v10" stroke="#fde68a" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
             </g>
+            <line x1="29" y1="29" x2="40" y2="40" stroke="#f59e0b" strokeWidth="5" strokeLinecap="round" />
         </svg>
     );
 }

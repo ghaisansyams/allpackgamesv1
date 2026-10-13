@@ -20,7 +20,7 @@ class LeaderboardDemoSeeder extends Seeder
         $this->stopwatch('Budi Santoso', 9.99);
         $this->movesGame('memory_card', 'Siti Aminah', 8);
         $this->movesGame('puzzle', 'Andi Wijaya', 12);
-        $this->recycleRush('Rina Kusuma', 17);
+        $this->spotMissing('Rina Kusuma', 1, 6);
         $this->wheelWin('Joko Prasetyo');
     }
 
@@ -48,15 +48,15 @@ class LeaderboardDemoSeeder extends Seeder
         ]);
     }
 
-    private function recycleRush(string $name, int $seconds): void
+    private function spotMissing(string $name, int $attempts, int $seconds): void
     {
         $visitor = Visitor::firstOrCreate(['name' => $name]);
 
         MiniGameAttempt::create([
             'visitor_id' => $visitor->id,
-            'game' => 'recycle_rush',
+            'game' => 'spot_missing',
             'won' => true,
-            'meta' => ['score' => 6, 'misses' => 0, 'seconds' => $seconds],
+            'meta' => ['attempts' => $attempts, 'seconds' => $seconds],
         ]);
     }
 

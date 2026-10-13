@@ -52,7 +52,7 @@ class LeaderboardController extends Controller
             ['game' => 'Stop at 10.00', 'entries' => $this->rankedStopwatch($limit)],
             ['game' => 'Memory Match', 'entries' => $this->rankedByMoves('memory_card', $limit)],
             ['game' => 'Packaging Puzzle', 'entries' => $this->rankedByMoves('puzzle', $limit)],
-            ['game' => 'Recycle Rush', 'entries' => $this->rankedRecycleRush($limit)],
+            ['game' => "What's Missing?", 'entries' => $this->rankedSpotMissing($limit)],
             ['game' => 'Spin the Wheel', 'entries' => $this->recentWheelWins($limit)],
         ])->filter(fn (array $game) => count($game['entries']) > 0);
     }
@@ -95,22 +95,25 @@ class LeaderboardController extends Controller
             ->all();
     }
 
-    private function rankedRecycleRush(int $limit): array
+    private function rankedSpotMissing(int $limit): array
     {
-        // Every winner finishes at the same score (the round ends the instant it's reached),
-        // so time-to-win is the only metric that actually ranks anyone.
+        // Fewest attempts wins the tiebreak first (spotting it on try 1 beats a lucky fast
+        // try 4), then fastest time as the secondary sort.
         return MiniGameAttempt::query()
-            ->where('game', 'recycle_rush')
+            ->where('game', 'spot_missing')
             ->where('won', true)
             ->whereNotNull('visitor_id')
             ->with('visitor:id,name')
             ->get()
-            ->filter(fn (MiniGameAttempt $a) => $a->visitor && isset($a->meta['seconds']))
-            ->sortBy(fn (MiniGameAttempt $a) => $a->meta['seconds'])
+            ->filter(fn (MiniGameAttempt $a) => $a->visitor && isset($a->meta['attempts'], $a->meta['seconds']))
+            // Collection::sortBy()'s multi-key form only reliably compares dot-path string
+            // keys (resolved via data_get), not an array of closures — verified separately,
+            // since that's a surprising enough gotcha to be worth a short note.
+            ->sortBy(['meta.attempts', 'meta.seconds'])
             ->take($limit)
             ->map(fn (MiniGameAttempt $a) => [
                 'name' => $a->visitor->name,
-                'score' => $a->meta['seconds'].'s',
+                'score' => $a->meta['attempts'].' '.($a->meta['attempts'] === 1 ? 'try' : 'tries'),
             ])
             ->values()
             ->all();

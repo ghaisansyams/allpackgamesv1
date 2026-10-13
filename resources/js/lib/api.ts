@@ -59,7 +59,7 @@ export const DecisionSessionApi = {
 
 export const MiniGameApi = {
     record: (
-        game: 'memory_card' | 'puzzle' | 'stopwatch' | 'recycle_rush',
+        game: 'memory_card' | 'puzzle' | 'stopwatch' | 'spot_missing',
         won: boolean,
         visitorId?: number | null,
         meta?: Record<string, unknown>,
