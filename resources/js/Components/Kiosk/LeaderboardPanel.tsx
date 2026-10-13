@@ -38,10 +38,10 @@ export default function LeaderboardPanel() {
                 <p className="mb-3 flex items-center justify-center gap-1.5 font-display text-xs font-bold uppercase tracking-widest text-amber-400">
                     <Trophy className="h-3.5 w-3.5" /> Top Scores
                 </p>
-                <ul className="space-y-3">
+                <ul className="space-y-3 text-left">
                     {entries.map((entry, i) => (
                         <li key={i}>
-                            <p className="text-[11px] uppercase tracking-wide text-slate-400">{entry.game}</p>
+                            <p className="text-left text-[11px] uppercase tracking-wide text-slate-400">{entry.game}</p>
                             <div className="flex items-baseline justify-between gap-2">
                                 <span className="truncate font-semibold text-white">{entry.name}</span>
                                 <span className="shrink-0 font-display font-black text-amber-400">{entry.score}</span>

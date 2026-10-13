@@ -9,9 +9,10 @@ export default function Join({ token, alreadyClaimed }: { token: string; already
     const form = useForm({
         name: '',
         contact: '',
+        email: '',
     });
 
-    const isValid = form.data.name.trim().length > 0;
+    const isValid = form.data.name.trim().length > 0 && form.data.contact.trim().length > 0;
 
     function submit(e: FormEvent) {
         e.preventDefault();
@@ -53,11 +54,18 @@ export default function Join({ token, alreadyClaimed }: { token: string; already
                         error={form.errors.name}
                     />
                     <Field
-                        placeholder="Email (optional)"
-                        type="email"
+                        placeholder="Phone Number"
+                        type="tel"
                         value={form.data.contact}
                         onChange={(v) => form.setData('contact', v)}
                         error={form.errors.contact}
+                    />
+                    <Field
+                        placeholder="Email (optional)"
+                        type="email"
+                        value={form.data.email}
+                        onChange={(v) => form.setData('email', v)}
+                        error={form.errors.email}
                     />
 
                     <TouchButton type="submit" disabled={!isValid || form.processing} className="mt-2 w-full">

@@ -15,6 +15,7 @@ class Visitor extends Model
         'company',
         'job_title',
         'contact',
+        'email',
         'industry',
         'industry_other',
         'email_sent_at',

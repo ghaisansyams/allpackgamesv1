@@ -13,7 +13,8 @@ class VisitorController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'contact' => ['nullable', 'email', 'max:255'],
+            'contact' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
         ]);
 
         $visitor = Visitor::create($data);
