@@ -73,8 +73,14 @@ export interface LeaderboardEntry {
     score: string;
 }
 
+export interface LeaderboardGame {
+    game: string;
+    entries: { name: string; score: string }[];
+}
+
 export const LeaderboardApi = {
     recent: () => api().get<{ entries: LeaderboardEntry[] }>('/api/leaderboard').then((r) => r.data.entries),
+    full: () => api().get<{ games: LeaderboardGame[] }>('/api/leaderboard/full').then((r) => r.data.games),
 };
 
 export const WheelApi = {
