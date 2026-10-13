@@ -16,10 +16,12 @@ import RecycleRushExperience from '@/Features/RecycleRush/RecycleRushExperience'
 type Screen = 'idle' | 'choose' | 'wheel' | 'decision_lab' | 'memory' | 'puzzle' | 'stopwatch' | 'recycle_rush';
 
 // Visitors scan this to fill their details on their own phone, then get bounced back here
-// automatically. On deployments without a running Reverb server (e.g. the Vercel demo build)
-// this still works via the booth session's polling fallback, just with a few seconds of lag
-// instead of an instant push.
-const QR_JOIN_ENABLED = true;
+// automatically — needs two requests (booth creates the session, phone claims it) to land on
+// the same backend state, which real booth hardware (one machine, one SQLite file) guarantees
+// but an ephemeral container deployment (e.g. the Vercel demo build) does not: a recycled
+// instance can lose the session between those two requests. Baked off there via
+// VITE_QR_JOIN_ENABLED=false at build time; defaults on everywhere else.
+const QR_JOIN_ENABLED = import.meta.env.VITE_QR_JOIN_ENABLED !== 'false';
 
 type LogoComponent = (props: { className?: string }) => JSX.Element;
 
