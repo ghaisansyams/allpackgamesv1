@@ -88,6 +88,14 @@ export default function Hub() {
                         </p>
                     </div>
 
+                    {/* For visitors already in the company's own customer database who'd rather
+                        not re-enter their details here — goes straight to the games, no
+                        visitor record attached (so results won't show up under their name on
+                        the leaderboard). */}
+                    <button onClick={goToChoose} className="text-sm text-slate-400 underline hover:text-slate-200">
+                        Already a customer? Skip and play
+                    </button>
+
                     <LeaderboardPanel />
                 </div>
             )}
