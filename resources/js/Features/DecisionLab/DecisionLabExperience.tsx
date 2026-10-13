@@ -4,7 +4,7 @@ import TouchButton from '@/Components/Kiosk/TouchButton';
 import StepHeader from '@/Components/Kiosk/StepHeader';
 import SelectCard from '@/Components/Kiosk/SelectCard';
 import CountdownBar from '@/Components/Kiosk/CountdownBar';
-import Mascot from '@/Components/Kiosk/Mascot';
+import { DecisionLogo } from '@/Components/Kiosk/GameLogos';
 import Icon from '@/lib/icons';
 import { ContentApi, DecisionSessionApi } from '@/lib/api';
 import { clearPersistedState, loadPersistedState, savePersistedState } from '@/lib/sessionPersistence';
@@ -174,7 +174,7 @@ export default function DecisionLabExperience({
     if (stage === 'loading' || !content) {
         return (
             <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-                <Mascot pose="thinking" className="h-24" />
+                <DecisionLogo className="h-24 w-24" />
                 <p className="text-xl text-slate-300">{error ?? 'Loading experience…'}</p>
             </div>
         );
@@ -199,7 +199,7 @@ export default function DecisionLabExperience({
 
             {stage === 'start' && (
                 <div className="mx-auto max-w-2xl rounded-3xl border border-amber-400/20 bg-white/[0.06] p-10 text-center shadow-2xl backdrop-blur-xl">
-                    <Mascot pose="point" className="mx-auto mb-4 h-28" />
+                    <DecisionLogo className="mx-auto mb-4 h-28 w-28" />
                     <h2 className="font-display text-3xl font-black uppercase text-white">What Kind of Packaging Challenge Can You Solve?</h2>
                     <p className="mt-3 text-slate-300">You have approximately 2–3 minutes to make your decision.</p>
                     <TouchButton className="mt-8" onClick={() => setStage('business_case')}>

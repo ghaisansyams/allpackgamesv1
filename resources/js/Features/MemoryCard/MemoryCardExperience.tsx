@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Coffee, Cookie, Utensils, Droplet, Pill, Sparkles, LucideIcon } from 'lucide-react';
 import CountdownBar from '@/Components/Kiosk/CountdownBar';
 import GameResultPopup from '@/Components/Kiosk/GameResultPopup';
-import Mascot from '@/Components/Kiosk/Mascot';
+import { MemoryLogo } from '@/Components/Kiosk/GameLogos';
 import { MiniGameApi } from '@/lib/api';
 
 const ICONS: LucideIcon[] = [Coffee, Cookie, Utensils, Droplet, Pill, Sparkles];
@@ -98,7 +98,7 @@ export default function MemoryCardExperience({ visitorId, onBack }: { visitorId:
                 <ArrowLeft className="h-4 w-4" /> Back
             </button>
 
-            <Mascot pose="point" className="mb-2 h-20" />
+            <MemoryLogo className="mb-2 h-20 w-20" />
             <h2 className="mb-1 font-display text-3xl font-black uppercase text-white">Memory Match</h2>
             <p className="mb-4 text-slate-300">Find all 6 packaging pairs before time runs out!</p>
 

@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import QrCodeImage from '@/Components/Kiosk/QrCodeImage';
-import Mascot from '@/Components/Kiosk/Mascot';
 import CosmicBackground from '@/Components/Kiosk/CosmicBackground';
-import { GameLogoStyles, WheelLogo, DecisionLogo, MemoryLogo, PuzzleLogo, StopwatchLogo } from '@/Components/Kiosk/GameLogos';
+import { WheelLogo, DecisionLogo, MemoryLogo, PuzzleLogo, StopwatchLogo } from '@/Components/Kiosk/GameLogos';
 import { useBoothSession } from '@/lib/useBoothSession';
 import { useIdleReset } from '@/lib/useIdleReset';
 import WheelExperience from '@/Features/Wheel/WheelExperience';
@@ -63,7 +62,7 @@ export default function Hub() {
                     <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
                         ALLPACK 2026 · Interactive Experience Hub
                     </p>
-                    <Mascot pose="wave" className="h-36" />
+                    <WheelLogo className="h-32 w-32" />
                     <h1 className="font-display text-5xl font-black uppercase leading-tight text-white drop-shadow-[0_0_30px_rgba(245,158,11,0.4)]">
                         GROWING OUR
                         <br />
@@ -93,7 +92,7 @@ export default function Hub() {
                     <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
                         ALLPACK 2026 · Interactive Experience Hub
                     </p>
-                    <Mascot pose="wave" className="h-36" />
+                    <WheelLogo className="h-32 w-32" />
                     <h1 className="font-display text-5xl font-black uppercase leading-tight text-white drop-shadow-[0_0_30px_rgba(245,158,11,0.4)]">
                         GROWING OUR
                         <br />
@@ -109,7 +108,6 @@ export default function Hub() {
 
             {screen === 'choose' && (
                 <div className="flex min-h-screen flex-col items-center gap-6 px-6 py-10 text-center">
-                    <GameLogoStyles />
                     <div className="pt-6">
                         <p className="font-display mb-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
                             Choose Your Game

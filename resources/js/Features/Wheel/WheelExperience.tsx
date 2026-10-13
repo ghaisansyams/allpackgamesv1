@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import TouchButton from '@/Components/Kiosk/TouchButton';
-import Mascot from '@/Components/Kiosk/Mascot';
+import { WheelLogo } from '@/Components/Kiosk/GameLogos';
 import SpinWheel from './SpinWheel';
 import SpinReveal from './SpinReveal';
 import { ContentApi, WheelApi } from '@/lib/api';
@@ -71,7 +71,7 @@ export default function WheelExperience({
     if (stage === 'loading' || segments.length === 0) {
         return (
             <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-                <Mascot pose="thinking" className="h-24" />
+                <WheelLogo className="h-24 w-24" />
                 <p className="text-xl text-slate-300">{error ?? 'Loading experience…'}</p>
             </div>
         );
@@ -89,7 +89,6 @@ export default function WheelExperience({
             {error && <p className="mb-4 rounded-xl border border-red-500/30 bg-red-950/50 px-4 py-3 text-center text-red-300">{error}</p>}
 
             <div className="w-full text-center">
-                <Mascot pose="idle" className="mx-auto mb-2 h-20" />
                 <h2 className="mb-2 font-display text-4xl font-black uppercase tracking-wide text-white drop-shadow-[0_0_20px_rgba(245,158,11,0.4)]">
                     Spin. Play. Pack. Win!
                 </h2>

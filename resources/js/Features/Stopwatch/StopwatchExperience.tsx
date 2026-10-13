@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import TouchButton from '@/Components/Kiosk/TouchButton';
 import GameResultPopup from '@/Components/Kiosk/GameResultPopup';
-import Mascot from '@/Components/Kiosk/Mascot';
+import { StopwatchLogo } from '@/Components/Kiosk/GameLogos';
 import { MiniGameApi } from '@/lib/api';
 
 const TARGET_SECONDS = 10;
@@ -64,7 +64,7 @@ export default function StopwatchExperience({ visitorId, onBack }: { visitorId: 
                 <ArrowLeft className="h-4 w-4" /> Back
             </button>
 
-            <Mascot pose={phase === 'running' ? 'shock' : 'point'} className="mb-2 h-20" />
+            <StopwatchLogo className={`mb-2 h-20 w-20 ${phase === 'running' ? 'animate-pulse' : ''}`} />
             <h2 className="mb-1 font-display text-3xl font-black uppercase text-white">Stop at 10.00</h2>
             <p className="mb-8 text-center text-slate-300">Tap Start, then Stop the clock as close to exactly 10.00 seconds as you can.</p>
 

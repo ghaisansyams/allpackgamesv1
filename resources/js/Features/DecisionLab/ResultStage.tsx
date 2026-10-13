@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import TouchButton from '@/Components/Kiosk/TouchButton';
-import Mascot, { MascotPose } from '@/Components/Kiosk/Mascot';
 import type { DecisionResult } from '@/types/content';
 
 export default function ResultStage({
@@ -20,11 +19,9 @@ export default function ResultStage({
     const [sendingEmail, setSendingEmail] = useState(false);
 
     const fitLabel = result.fit_score >= 85 ? 'Strong Fit' : result.fit_score >= 65 ? 'Good Fit' : 'Fair Fit';
-    const mascotPose: MascotPose = result.fit_score >= 85 ? 'celebrate' : result.fit_score >= 65 ? 'proud' : 'doh';
 
     return (
         <div className="mx-auto w-full max-w-4xl">
-            <Mascot pose={mascotPose} className="mx-auto mb-2 h-24" bounce={result.fit_score >= 85} />
             <p className="mb-2 text-center font-display text-sm font-semibold uppercase tracking-widest text-amber-400">
                 Your Packaging Decision
             </p>

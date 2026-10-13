@@ -1,6 +1,7 @@
+import { Frown } from 'lucide-react';
 import { PropsWithChildren } from 'react';
 import TouchButton from '@/Components/Kiosk/TouchButton';
-import Mascot, { MascotPose } from '@/Components/Kiosk/Mascot';
+import PrizeIcon from '@/Components/Kiosk/PrizeIcon';
 
 export default function GameResultPopup({
     won,
@@ -14,8 +15,6 @@ export default function GameResultPopup({
     onPlayAgain: () => void;
     onDone: () => void;
 }>) {
-    const pose: MascotPose = won ? 'celebrate' : 'doh';
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-sm">
             <div
@@ -25,7 +24,11 @@ export default function GameResultPopup({
                         : 'border-red-500/30 bg-gradient-to-br from-slate-950 via-[#1a0a12] to-slate-950 shadow-[0_0_60px_rgba(225,29,72,0.25)]'
                 }`}
             >
-                <Mascot pose={pose} className="mx-auto mb-3 h-24" bounce={won} />
+                {won ? (
+                    <PrizeIcon className="mx-auto mb-3 h-20 w-20 animate-bounce" />
+                ) : (
+                    <Frown className="mx-auto mb-3 h-16 w-16 text-red-400" strokeWidth={1.5} />
+                )}
                 <h2 className={`mb-3 font-display text-2xl font-black uppercase tracking-wide ${won ? 'text-amber-950' : 'text-amber-400'}`}>
                     {title}
                 </h2>

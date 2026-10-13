@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
-import Mascot from '@/Components/Kiosk/Mascot';
+import { AlertTriangle } from 'lucide-react';
 
 const INDUSTRIES = ['Food & Beverage', 'Pharmaceutical', 'Cosmetic / Personal Care', 'Packaging', 'Manufacturing', 'Other'];
 
@@ -35,7 +35,7 @@ export default function Join({ token, alreadyClaimed }: { token: string; already
         return (
             <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-6 text-center">
                 <Head title="ALLPACK — Join" />
-                <Mascot pose="shock" className="h-28" />
+                <AlertTriangle className="h-16 w-16 text-amber-500" strokeWidth={1.5} />
                 <h1 className="text-xl font-black text-slate-900">This QR code has already been used</h1>
                 <p className="text-slate-500">Ask the booth crew to show you a fresh QR code on the screen.</p>
             </div>
@@ -48,8 +48,7 @@ export default function Join({ token, alreadyClaimed }: { token: string; already
 
             <div className="mx-auto max-w-md">
                 <div className="mb-6 text-center">
-                    <Mascot pose="wave" className="mx-auto h-24" />
-                    <p className="mt-2 text-xs font-bold uppercase tracking-widest text-emerald-700">ALLPACK 2026</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">ALLPACK 2026</p>
                     <h1 className="text-2xl font-black text-slate-900">Let's Get Started!</h1>
                     <p className="mt-1 text-sm text-slate-500">Fill in your details, then look back at the booth screen.</p>
                 </div>
