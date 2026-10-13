@@ -10,10 +10,14 @@ import type { WheelSpinResult } from '@/types/content';
 export default function SpinReveal({
     spin,
     onSpinAgain,
+    onBack,
     onDone,
 }: {
     spin: WheelSpinResult;
     onSpinAgain: () => void;
+    /** Returns to the game-selection screen — the visitor is still mid-visit. */
+    onBack: () => void;
+    /** Ends the visit and returns to the idle/registration screen. */
     onDone: () => void;
 }) {
     const isWin = spin.outcome === 'win';
@@ -41,8 +45,11 @@ export default function SpinReveal({
                     <TouchButton variant={isWin ? 'secondary' : 'ghost'} onClick={onSpinAgain}>
                         Spin Again
                     </TouchButton>
+                    <TouchButton variant="ghost" onClick={onBack}>
+                        Choose Another Game
+                    </TouchButton>
                     <button onClick={onDone} className={`text-sm font-semibold underline ${isWin ? 'text-amber-950/80' : 'text-slate-400'}`}>
-                        {isWin ? 'Show This to Our Crew' : 'Done'}
+                        End Session
                     </button>
                 </div>
             </div>

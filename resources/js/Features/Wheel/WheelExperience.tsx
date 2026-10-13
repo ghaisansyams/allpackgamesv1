@@ -119,6 +119,10 @@ export default function WheelExperience({
                         closeReveal();
                         handleSpin();
                     }}
+                    onBack={() => {
+                        closeReveal();
+                        onBack();
+                    }}
                     onDone={() => {
                         closeReveal();
                         onExit();
