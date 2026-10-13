@@ -318,7 +318,7 @@ export default function DecisionLabExperience({
             {stage === 'result' && result && sessionId && (
                 <ResultStage
                     result={result}
-                    onSendEmail={() => DecisionSessionApi.handoff(sessionId, 'email')}
+                    onSendEmail={(email) => DecisionSessionApi.handoff(sessionId, 'email', email)}
                     onTalkToExpert={() => DecisionSessionApi.handoff(sessionId, 'expert')}
                     onBack={onBack}
                 />

@@ -3,16 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Mail\DecisionResultMail;
 use App\Models\DecisionSession;
 use App\Models\PackagingOption;
-use App\Models\Visitor;
 use App\Services\PackagingScoringService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class DecisionSessionController extends Controller
 {
@@ -111,48 +106,31 @@ class DecisionSessionController extends Controller
         ]);
     }
 
+    /**
+     * "Email" doesn't send anything automatically — it just captures the address the visitor
+     * types in right here (not the visitor's own contact field, which may not even exist for
+     * an anonymous "Skip and play" session, or may hold a phone number rather than an email)
+     * so the booth team can follow up with the result themselves.
+     */
     public function handoff(Request $request, DecisionSession $decisionSession): JsonResponse
     {
         $data = $request->validate([
             'type' => ['required', 'in:email,expert'],
+            'email' => ['required_if:type,email', 'nullable', 'email', 'max:255'],
         ]);
 
-        $visitor = $decisionSession->visitor;
-
-        if (! $visitor instanceof Visitor) {
-            return response()->json(['status' => 'ok']);
-        }
-
         if ($data['type'] === 'expert') {
-            $visitor->update(['handoff_requested_at' => now()]);
+            $decisionSession->visitor?->update(['handoff_requested_at' => now()]);
 
             return response()->json(['status' => 'ok']);
         }
 
         abort_if($decisionSession->completed_at === null, 422, 'This session has no result to email yet.');
 
-        if (! filter_var($visitor->contact, FILTER_VALIDATE_EMAIL)) {
-            return response()->json([
-                'status' => 'invalid_email',
-                'message' => 'The contact on file is not a valid email address, so no result could be sent.',
-            ], 422);
-        }
-
-        try {
-            Mail::to($visitor->contact)->send(new DecisionResultMail($decisionSession));
-        } catch (TransportExceptionInterface $e) {
-            Log::warning('Failed to send decision result email', [
-                'decision_session_id' => $decisionSession->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'status' => 'send_failed',
-                'message' => 'We could not send the email right now. Please try again in a moment.',
-            ], 502);
-        }
-
-        $visitor->update(['email_sent_at' => now()]);
+        $decisionSession->update([
+            'email' => $data['email'],
+            'email_requested_at' => now(),
+        ]);
 
         return response()->json(['status' => 'ok']);
     }

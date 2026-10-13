@@ -47,9 +47,9 @@ export const DecisionSessionApi = {
             )
             .then((r) => r.data),
 
-    handoff: (sessionId: number, type: 'email' | 'expert'): Promise<{ ok: boolean; message?: string }> =>
+    handoff: (sessionId: number, type: 'email' | 'expert', email?: string): Promise<{ ok: boolean; message?: string }> =>
         api()
-            .post(`/api/decision-sessions/${sessionId}/handoff`, { type })
+            .post(`/api/decision-sessions/${sessionId}/handoff`, { type, email })
             .then(() => ({ ok: true }))
             .catch((error) => ({
                 ok: false,

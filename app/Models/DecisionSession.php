@@ -12,6 +12,7 @@ class DecisionSession extends Model
 
     protected $fillable = [
         'visitor_id',
+        'email',
         'business_case_id',
         'market_slug',
         'priority_1_slug',
@@ -24,12 +25,14 @@ class DecisionSession extends Model
         'strength',
         'trade_off',
         'completed_at',
+        'email_requested_at',
     ];
 
     protected function casts(): array
     {
         return [
             'completed_at' => 'datetime',
+            'email_requested_at' => 'datetime',
         ];
     }
 
