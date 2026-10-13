@@ -99,6 +99,15 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Neon's pooled host is fronted by PgBouncer in transaction-pooling mode, which
+            // doesn't reliably support PDO's real (server-side) prepared statements — a
+            // request can get handed a backend connection whose cached plan was prepared
+            // against a since-changed table shape (e.g. right after a migration), throwing
+            // "cached plan must not change result type". Emulated prepares send plain SQL
+            // instead, sidestepping that entirely.
+            'options' => [
+                PDO::ATTR_EMULATE_PREPARES => true,
+            ],
         ],
 
         'sqlsrv' => [
