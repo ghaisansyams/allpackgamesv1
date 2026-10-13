@@ -269,8 +269,8 @@ export default function DecisionLabExperience({ onExit }: { onExit: () => void }
             {stage === 'result' && result && sessionId && (
                 <ResultStage
                     result={result}
-                    onSendEmail={() => DecisionSessionApi.handoff(sessionId, 'email').then(() => undefined)}
-                    onTalkToExpert={() => DecisionSessionApi.handoff(sessionId, 'expert').then(() => undefined)}
+                    onSendEmail={() => DecisionSessionApi.handoff(sessionId, 'email')}
+                    onTalkToExpert={() => DecisionSessionApi.handoff(sessionId, 'expert')}
                     onRestart={restart}
                 />
             )}

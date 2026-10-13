@@ -9,12 +9,14 @@ export default function ResultStage({
     onRestart,
 }: {
     result: DecisionResult;
-    onSendEmail: () => Promise<void>;
-    onTalkToExpert: () => Promise<void>;
+    onSendEmail: () => Promise<{ ok: boolean; message?: string }>;
+    onTalkToExpert: () => Promise<{ ok: boolean; message?: string }>;
     onRestart: () => void;
 }) {
     const [emailSent, setEmailSent] = useState(false);
     const [expertRequested, setExpertRequested] = useState(false);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [sendingEmail, setSendingEmail] = useState(false);
 
     const fitLabel = result.fit_score >= 85 ? 'Strong Fit' : result.fit_score >= 65 ? 'Good Fit' : 'Fair Fit';
 
@@ -52,13 +54,20 @@ export default function ResultStage({
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <TouchButton
                     variant="secondary"
-                    disabled={emailSent}
+                    disabled={emailSent || sendingEmail}
                     onClick={async () => {
-                        await onSendEmail();
-                        setEmailSent(true);
+                        setSendingEmail(true);
+                        setEmailError(null);
+                        const { ok, message } = await onSendEmail();
+                        setSendingEmail(false);
+                        if (ok) {
+                            setEmailSent(true);
+                        } else {
+                            setEmailError(message ?? 'Could not send the email. Please try again.');
+                        }
                     }}
                 >
-                    {emailSent ? 'Result Sent ✓' : 'Kirim Hasil ke Email'}
+                    {emailSent ? 'Result Sent ✓' : sendingEmail ? 'Sending…' : 'Kirim Hasil ke Email'}
                 </TouchButton>
                 <TouchButton
                     disabled={expertRequested}
@@ -70,6 +79,10 @@ export default function ResultStage({
                     {expertRequested ? 'Our Team Is Coming ✓' : 'Talk to Our Expert'}
                 </TouchButton>
             </div>
+
+            {emailError && (
+                <p className="mt-3 text-center text-sm text-red-600">{emailError}</p>
+            )}
 
             <div className="mt-6 text-center">
                 <button onClick={onRestart} className="text-slate-500 underline">

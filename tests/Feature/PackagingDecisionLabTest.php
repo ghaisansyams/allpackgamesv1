@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Mail\DecisionResultMail;
 use App\Models\BusinessCase;
+use App\Models\DecisionSession;
 use App\Models\PackagingOption;
 use App\Models\Visitor;
 use Database\Seeders\ContentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class PackagingDecisionLabTest extends TestCase
@@ -15,6 +18,8 @@ class PackagingDecisionLabTest extends TestCase
 
     public function test_full_session_journey_computes_the_documented_example_score(): void
     {
+        Mail::fake();
+
         $this->seed(ContentSeeder::class);
 
         $visitor = $this->postJson('/api/visitors', [
@@ -65,6 +70,42 @@ class PackagingDecisionLabTest extends TestCase
             ->assertOk();
 
         $this->assertNotNull(Visitor::find($visitor['id'])->email_sent_at);
+        Mail::assertSent(DecisionResultMail::class, fn (DecisionResultMail $mail) => $mail->hasTo('budi@abc.com')
+            && $mail->decisionSession->id === $session['id']);
+    }
+
+    public function test_email_handoff_is_rejected_when_contact_is_not_a_valid_email(): void
+    {
+        Mail::fake();
+        $this->seed(ContentSeeder::class);
+
+        $visitor = Visitor::factory()->create(['contact' => '+62 812-3456-7890']);
+        $session = DecisionSession::factory()->create([
+            'visitor_id' => $visitor->id,
+            'completed_at' => now(),
+            'fit_score' => 80,
+        ]);
+
+        $this->postJson("/api/decision-sessions/{$session->id}/handoff", ['type' => 'email'])
+            ->assertStatus(422)
+            ->assertJsonPath('status', 'invalid_email');
+
+        Mail::assertNothingSent();
+        $this->assertNull($visitor->fresh()->email_sent_at);
+    }
+
+    public function test_email_handoff_is_rejected_before_the_session_has_a_result(): void
+    {
+        Mail::fake();
+        $this->seed(ContentSeeder::class);
+
+        $visitor = Visitor::factory()->create(['contact' => 'valid@example.com']);
+        $session = DecisionSession::factory()->create(['visitor_id' => $visitor->id, 'completed_at' => null]);
+
+        $this->postJson("/api/decision-sessions/{$session->id}/handoff", ['type' => 'email'])
+            ->assertStatus(422);
+
+        Mail::assertNothingSent();
     }
 
     public function test_decision_requires_three_priorities_to_be_set_first(): void

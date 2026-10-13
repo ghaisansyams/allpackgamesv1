@@ -48,8 +48,14 @@ export const DecisionSessionApi = {
             )
             .then((r) => r.data),
 
-    handoff: (sessionId: number, type: 'email' | 'expert') =>
-        api().post(`/api/decision-sessions/${sessionId}/handoff`, { type }),
+    handoff: (sessionId: number, type: 'email' | 'expert'): Promise<{ ok: boolean; message?: string }> =>
+        api()
+            .post(`/api/decision-sessions/${sessionId}/handoff`, { type })
+            .then(() => ({ ok: true }))
+            .catch((error) => ({
+                ok: false,
+                message: error.response?.data?.message ?? 'Something went wrong. Please try again.',
+            })),
 };
 
 export const WheelApi = {
