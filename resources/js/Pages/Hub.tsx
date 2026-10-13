@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
-import { Disc3, Target, Grid3x3, Puzzle, Timer } from 'lucide-react';
 import QrCodeImage from '@/Components/Kiosk/QrCodeImage';
 import Mascot from '@/Components/Kiosk/Mascot';
 import CosmicBackground from '@/Components/Kiosk/CosmicBackground';
+import { GameLogoStyles, WheelLogo, DecisionLogo, MemoryLogo, PuzzleLogo, StopwatchLogo } from '@/Components/Kiosk/GameLogos';
 import { useBoothSession } from '@/lib/useBoothSession';
 import { useIdleReset } from '@/lib/useIdleReset';
 import WheelExperience from '@/Features/Wheel/WheelExperience';
@@ -19,12 +19,14 @@ type Screen = 'idle' | 'choose' | 'wheel' | 'decision_lab' | 'memory' | 'puzzle'
 // stays wired up underneath either way.
 const QR_JOIN_ENABLED = false;
 
-const GAMES: { screen: Screen; title: string; tagline: string; icon: typeof Disc3 }[] = [
-    { screen: 'wheel', title: 'Spin the Wheel', tagline: 'SPIN. PLAY. PACK. WIN!', icon: Disc3 },
-    { screen: 'decision_lab', title: 'Decision Lab', tagline: 'Can you pick the right pack?', icon: Target },
-    { screen: 'memory', title: 'Memory Match', tagline: 'Find the matching pairs', icon: Grid3x3 },
-    { screen: 'puzzle', title: 'Packaging Puzzle', tagline: 'Slide it back together', icon: Puzzle },
-    { screen: 'stopwatch', title: 'Stop at 10.00', tagline: 'Precision wins the prize', icon: Timer },
+type LogoComponent = (props: { className?: string }) => JSX.Element;
+
+const GAMES: { screen: Screen; title: string; tagline: string; Logo: LogoComponent }[] = [
+    { screen: 'wheel', title: 'Spin the Wheel', tagline: 'SPIN. PLAY. PACK. WIN!', Logo: WheelLogo },
+    { screen: 'decision_lab', title: 'Decision Lab', tagline: 'Can you pick the right pack?', Logo: DecisionLogo },
+    { screen: 'memory', title: 'Memory Match', tagline: 'Find the matching pairs', Logo: MemoryLogo },
+    { screen: 'puzzle', title: 'Packaging Puzzle', tagline: 'Slide it back together', Logo: PuzzleLogo },
+    { screen: 'stopwatch', title: 'Stop at 10.00', tagline: 'Precision wins the prize', Logo: StopwatchLogo },
 ];
 
 export default function Hub() {
@@ -107,14 +109,14 @@ export default function Hub() {
 
             {screen === 'choose' && (
                 <div className="flex min-h-screen flex-col items-center gap-6 px-6 py-10 text-center">
-                    <Mascot pose="point" className="h-24" />
-                    <div>
+                    <GameLogoStyles />
+                    <div className="pt-6">
                         <p className="font-display mb-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
                             Choose Your Game
                         </p>
                         <h1 className="font-display text-3xl font-black uppercase text-white">5 Ways to Play ALLPACK</h1>
                     </div>
-                    <div className="grid w-full max-w-md grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="flex w-full max-w-md flex-wrap justify-center gap-4">
                         {GAMES.map((game) => (
                             <GameCard key={game.screen} game={game} onClick={() => setScreen(game.screen)} />
                         ))}
@@ -146,19 +148,19 @@ function GameCard({
     game,
     onClick,
 }: {
-    game: { title: string; tagline: string; icon: typeof Disc3 };
+    game: { title: string; tagline: string; Logo: LogoComponent };
     onClick: () => void;
 }) {
-    const GameIcon = game.icon;
+    const { Logo } = game;
     return (
         <button
             onClick={onClick}
-            className="group flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-3xl border border-amber-400/20 bg-white/[0.06] p-6 text-center shadow-2xl backdrop-blur-xl transition hover:border-amber-400/60 hover:bg-white/[0.1] hover:shadow-[0_0_30px_rgba(245,158,11,0.35)] active:scale-95"
+            className="group flex min-h-[170px] w-[47%] min-w-[150px] flex-col items-center justify-center gap-2 rounded-3xl border border-amber-400/20 bg-white/[0.06] p-5 text-center shadow-2xl backdrop-blur-xl transition hover:border-amber-400/60 hover:bg-white/[0.1] hover:shadow-[0_0_30px_rgba(245,158,11,0.35)] active:scale-95"
         >
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-300/40 bg-gradient-to-br from-amber-400/20 to-red-600/20">
-                <GameIcon className="h-7 w-7 text-amber-300" />
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-300/40 bg-gradient-to-br from-amber-400/15 to-red-600/15">
+                <Logo className="h-10 w-10" />
             </span>
-            <span className="font-display text-lg font-black uppercase text-white">{game.title}</span>
+            <span className="font-display text-base font-black uppercase leading-tight text-white">{game.title}</span>
             <span className="text-xs text-slate-300">{game.tagline}</span>
         </button>
     );
