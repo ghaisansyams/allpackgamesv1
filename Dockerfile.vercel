@@ -4,15 +4,12 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-# This deployment's SQLite file isn't guaranteed to survive between the booth's and the
-# visitor's phone's requests (see Hub.tsx), so the QR/phone join flow is compiled out here.
-ENV VITE_QR_JOIN_ENABLED=false
 RUN npm run build
 
 FROM dunglas/frankenphp:1-php8.3-bookworm AS base
 
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
-    && install-php-extensions intl zip pdo_sqlite
+    && install-php-extensions intl zip pdo_pgsql
 
 WORKDIR /app
 
@@ -45,20 +42,6 @@ RUN rm -f bootstrap/cache/*.php \
         bootstrap/cache \
     && composer dump-autoload --no-dev --classmap-authoritative --no-scripts
 
-# Bake a demo SQLite database (migrated + seeded) into the image. This deployment has no
-# durable storage, so data resets whenever the container instance is recycled — fine for
-# showing off the booth game UI, not meant to hold real exhibition data.
-RUN cp .env.example .env \
-    && php artisan key:generate --force \
-    && sed -i 's#^SESSION_DRIVER=.*#SESSION_DRIVER=cookie#' .env \
-    && sed -i 's#^CACHE_STORE=.*#CACHE_STORE=array#' .env \
-    && sed -i 's#^QUEUE_CONNECTION=.*#QUEUE_CONNECTION=sync#' .env \
-    && sed -i 's#^BROADCAST_CONNECTION=.*#BROADCAST_CONNECTION=log#' .env \
-    && touch database/database.sqlite \
-    && php artisan migrate --force \
-    && php artisan db:seed --force --class=ContentSeeder \
-    && rm .env
-
 FROM base AS runtime
 
 COPY --from=dependencies --chown=www-data:www-data /app /app
@@ -75,7 +58,7 @@ ENV PORT=80 \
     SESSION_DRIVER=cookie \
     QUEUE_CONNECTION=sync \
     BROADCAST_CONNECTION=log \
-    DB_CONNECTION=sqlite
+    DB_CONNECTION=pgsql
 
 USER www-data
 
