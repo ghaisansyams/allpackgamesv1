@@ -42,8 +42,16 @@ export default function WheelExperience({
         try {
             const result = await WheelApi.spin(visitorId);
 
+            // `result.sort_order` is the segment's database value (seeded starting at 1, not
+            // necessarily contiguous with the rendered array) — look up where it actually
+            // landed in the rendered `segments` array instead of assuming it's a 0-based
+            // index, otherwise the wheel visually stops on the wrong wedge.
+            const landingIndex = Math.max(
+                segments.findIndex((s) => s.sort_order === result.sort_order),
+                0,
+            );
             const segmentAngle = 360 / segments.length;
-            const landingAngle = result.sort_order * segmentAngle + segmentAngle / 2;
+            const landingAngle = landingIndex * segmentAngle + segmentAngle / 2;
             const extraTurns = 5;
             setRotation((prev) => {
                 const baseline = prev - (prev % 360);

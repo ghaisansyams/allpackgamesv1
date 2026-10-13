@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Coffee, Cookie, Utensils, Droplet, Pill, Sparkles, LucideIcon } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import CountdownBar from '@/Components/Kiosk/CountdownBar';
 import GameResultPopup from '@/Components/Kiosk/GameResultPopup';
 import { MemoryLogo } from '@/Components/Kiosk/GameLogos';
+import { PACKAGING_IMAGES } from '@/lib/packagingImages';
 import { MiniGameApi } from '@/lib/api';
 
-const ICONS: LucideIcon[] = [Coffee, Cookie, Utensils, Droplet, Pill, Sparkles];
-const TIME_LIMIT = 60;
+const TIME_LIMIT = 75;
 
 interface CardState {
     key: number;
@@ -16,7 +16,7 @@ interface CardState {
 }
 
 function shuffledCards(): CardState[] {
-    const pairs = [...ICONS.keys(), ...ICONS.keys()];
+    const pairs = [...PACKAGING_IMAGES.keys(), ...PACKAGING_IMAGES.keys()];
     for (let i = pairs.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
@@ -100,30 +100,30 @@ export default function MemoryCardExperience({ visitorId, onBack }: { visitorId:
 
             <MemoryLogo className="mb-2 h-20 w-20" />
             <h2 className="mb-1 font-display text-3xl font-black uppercase text-white">Memory Match</h2>
-            <p className="mb-4 text-slate-300">Find all 6 packaging pairs before time runs out!</p>
+            <p className="mb-4 text-slate-300">Find all {PACKAGING_IMAGES.length} packaging pairs before time runs out!</p>
 
             {outcome === null && <CountdownBar key={round} totalSeconds={TIME_LIMIT} dangerSeconds={15} onExpire={() => finish('lose')} />}
 
             <p className="mb-4 font-display text-sm font-semibold text-amber-400">Moves: {moves}</p>
 
-            <div className="grid w-full grid-cols-4 gap-3">
+            <div className="grid w-full grid-cols-4 gap-2.5">
                 {cards.map((card) => {
-                    const Icon = ICONS[card.iconIndex];
+                    const image = PACKAGING_IMAGES[card.iconIndex];
                     const revealed = card.flipped || card.matched;
                     return (
                         <button
                             key={card.key}
                             onClick={() => flipCard(card.key)}
                             disabled={revealed}
-                            className={`flex aspect-square items-center justify-center rounded-2xl border text-2xl font-black shadow-lg transition active:scale-95 ${
+                            className={`flex aspect-square items-center justify-center overflow-hidden rounded-2xl border shadow-lg transition active:scale-95 ${
                                 card.matched
-                                    ? 'border-amber-400/50 bg-amber-400/15 text-amber-300'
+                                    ? 'border-amber-400/50 bg-amber-400/15'
                                     : revealed
-                                      ? 'border-amber-300/40 bg-white text-red-700'
+                                      ? 'border-amber-300/40 bg-white'
                                       : 'border-red-400/30 bg-gradient-to-br from-red-700 to-red-900 shadow-[0_0_14px_rgba(220,38,38,0.4)]'
                             }`}
                         >
-                            {revealed && <Icon className="h-8 w-8" />}
+                            {revealed && <img src={image.src} alt={image.label} className="h-full w-full object-cover" />}
                         </button>
                     );
                 })}

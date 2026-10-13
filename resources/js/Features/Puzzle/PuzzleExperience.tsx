@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { DragEvent, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import CountdownBar from '@/Components/Kiosk/CountdownBar';
 import GameResultPopup from '@/Components/Kiosk/GameResultPopup';
@@ -71,6 +71,20 @@ export default function PuzzleExperience({ visitorId, onBack }: { visitorId: num
         setRound((r) => r + 1);
     }
 
+    // Touch-screen visitors find dragging a tile into the gap more natural than tapping it —
+    // this reuses tapTile()'s own adjacency check, so a drag from a non-adjacent tile is just
+    // ignored rather than needing separate validation.
+    function handleDragStart(e: DragEvent<HTMLButtonElement>, position: number) {
+        e.dataTransfer.setData('text/plain', String(position));
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDropOnEmpty(e: DragEvent<HTMLDivElement>) {
+        e.preventDefault();
+        const dragged = Number(e.dataTransfer.getData('text/plain'));
+        if (!Number.isNaN(dragged)) tapTile(dragged);
+    }
+
     return (
         <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center px-6 py-10">
             <button
@@ -82,7 +96,7 @@ export default function PuzzleExperience({ visitorId, onBack }: { visitorId: num
 
             <PuzzleLogo className="mb-2 h-20 w-20" />
             <h2 className="mb-1 font-display text-3xl font-black uppercase text-white">Packaging Puzzle</h2>
-            <p className="mb-4 text-slate-300">Slide the tiles to rebuild the picture.</p>
+            <p className="mb-4 text-slate-300">Drag a tile into the gap, or tap it — whatever's easiest.</p>
 
             {outcome === null && <CountdownBar key={round} totalSeconds={TIME_LIMIT} dangerSeconds={20} onExpire={() => finish('lose')} />}
 
@@ -91,14 +105,24 @@ export default function PuzzleExperience({ visitorId, onBack }: { visitorId: num
             <div className="grid aspect-square w-full max-w-sm grid-cols-3 gap-1.5 rounded-2xl border border-amber-400/30 bg-white/[0.06] p-1.5 shadow-2xl backdrop-blur-xl">
                 {tiles.map((value, position) => {
                     if (value === EMPTY) {
-                        return <div key={position} />;
+                        return (
+                            <div
+                                key={position}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={handleDropOnEmpty}
+                                className="rounded-xl border-2 border-dashed border-amber-300/20"
+                            />
+                        );
                     }
                     const col = value % GRID;
                     const row = Math.floor(value / GRID);
                     return (
                         <button
                             key={position}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, position)}
                             onClick={() => tapTile(position)}
+                            onDoubleClick={() => tapTile(position)}
                             className="relative overflow-hidden rounded-xl border border-amber-300/30 shadow-lg transition active:scale-95"
                             style={{
                                 backgroundImage: `url(${IMAGE})`,

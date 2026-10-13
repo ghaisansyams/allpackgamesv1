@@ -115,6 +115,23 @@ export function StopwatchLogo({ className = 'h-10 w-10' }: { className?: string 
     );
 }
 
+export function RushLogo({ className = 'h-10 w-10' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 48 48" className={className}>
+            <circle cx="24" cy="24" r="21" fill="none" stroke="#fde68a" strokeWidth="1.5" opacity="0.4" />
+            <g style={{ transformOrigin: '24px 24px', animation: 'logo-pulse 1.1s ease-in-out infinite' }}>
+                <path
+                    d="M26 4 L10 27 H21 L18 44 L38 18 H27 Z"
+                    fill="#f59e0b"
+                    stroke="#78350f"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                />
+            </g>
+        </svg>
+    );
+}
+
 /** Shared keyframes for the logos above — injected once, reused by every card. */
 export function GameLogoStyles() {
     return (
@@ -136,6 +153,10 @@ export function GameLogoStyles() {
             @keyframes logo-slide {
                 0%, 100% { transform: translate(0, 0); }
                 50% { transform: translate(3px, 3px); }
+            }
+            @keyframes logo-pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.18); }
             }
         `}</style>
     );
