@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import TouchButton from '@/Components/Kiosk/TouchButton';
 import StepHeader from '@/Components/Kiosk/StepHeader';
 import SelectCard from '@/Components/Kiosk/SelectCard';
 import CountdownBar from '@/Components/Kiosk/CountdownBar';
 import Icon from '@/lib/icons';
 import { ContentApi, DecisionSessionApi, VisitorApi } from '@/lib/api';
+import { clearPersistedState, loadPersistedState, savePersistedState } from '@/lib/sessionPersistence';
 import VisitorDataStage, { VisitorFormData } from './VisitorDataStage';
 import ResultStage from './ResultStage';
 import type {
@@ -23,7 +25,20 @@ type Stage = 'loading' | 'visitor' | 'start' | 'business_case' | 'market' | 'pri
 // business case content — a placeholder visual treatment until case-specific photography exists.
 const OPTION_IMAGES = ['/images/packaging/option-a.png', '/images/packaging/option-b.png', '/images/packaging/option-c.png'];
 
-export default function DecisionLabExperience({ onExit }: { onExit: () => void }) {
+const STORAGE_KEY = 'allpack.decision-lab.v1';
+
+interface PersistedState {
+    stage: Stage;
+    visitorId: number | null;
+    sessionId: number | null;
+    businessCase: BusinessCase | null;
+    market: Market | null;
+    priorities: PrioritySlug[];
+    options: PackagingOptionChoice[] | null;
+    result: DecisionResult | null;
+}
+
+export default function DecisionLabExperience({ onExit, onBack }: { onExit: () => void; onBack: () => void }) {
     const [stage, setStage] = useState<Stage>('loading');
     const [content, setContent] = useState<DecisionLabContent | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -37,13 +52,55 @@ export default function DecisionLabExperience({ onExit }: { onExit: () => void }
     const [options, setOptions] = useState<PackagingOptionChoice[] | null>(null);
     const [result, setResult] = useState<DecisionResult | null>(null);
 
+    // Guards the persistence effect so it doesn't immediately overwrite the just-restored
+    // state with itself (or with the pre-restore defaults) before restoration has run.
+    const restoredRef = useRef(false);
+
     useEffect(() => {
         ContentApi.decisionLab()
             .then((data) => {
                 setContent(data);
-                setStage('visitor');
+
+                const persisted = loadPersistedState<PersistedState>(STORAGE_KEY);
+                if (persisted && persisted.stage !== 'loading') {
+                    setStage(persisted.stage);
+                    setVisitorId(persisted.visitorId);
+                    setSessionId(persisted.sessionId);
+                    setBusinessCase(persisted.businessCase);
+                    setMarket(persisted.market);
+                    setPriorities(persisted.priorities);
+                    setOptions(persisted.options);
+                    setResult(persisted.result);
+                } else {
+                    setStage('visitor');
+                }
+                restoredRef.current = true;
             })
             .catch(() => setError('Unable to load content. Please check the connection.'));
+    }, []);
+
+    useEffect(() => {
+        if (!restoredRef.current || stage === 'loading') {
+            return;
+        }
+        savePersistedState<PersistedState>(STORAGE_KEY, {
+            stage,
+            visitorId,
+            sessionId,
+            businessCase,
+            market,
+            priorities,
+            options,
+            result,
+        });
+    }, [stage, visitorId, sessionId, businessCase, market, priorities, options, result]);
+
+    // A deliberate exit (back button, finishing the flow, idle timeout unmounting this
+    // component) clears the saved progress so the next visitor never resumes a stranger's
+    // half-finished form. An accidental page refresh never runs this — only a React unmount
+    // does — so refreshing mid-flow is exactly the case that still gets restored above.
+    useEffect(() => {
+        return () => clearPersistedState(STORAGE_KEY);
     }, []);
 
     async function handleVisitorSubmit(form: VisitorFormData) {
@@ -139,6 +196,15 @@ export default function DecisionLabExperience({ onExit }: { onExit: () => void }
 
     return (
         <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col justify-center px-6 py-10">
+            {stage !== 'result' && (
+                <button
+                    onClick={onBack}
+                    className="mb-4 flex w-fit items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
+                >
+                    <ArrowLeft className="h-4 w-4" /> Back
+                </button>
+            )}
+
             {error && (
                 <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-center text-red-700">{error}</p>
             )}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import TouchButton from '@/Components/Kiosk/TouchButton';
 import SpinWheel from './SpinWheel';
 import SpinReveal from './SpinReveal';
@@ -10,7 +11,15 @@ const SLOT_COUNT = 8;
 
 type Stage = 'idle' | 'spinning' | 'revealed' | 'lead' | 'thanks';
 
-export default function WheelExperience({ onExit, onGoToDecisionLab }: { onExit: () => void; onGoToDecisionLab: () => void }) {
+export default function WheelExperience({
+    onExit,
+    onBack,
+    onGoToDecisionLab,
+}: {
+    onExit: () => void;
+    onBack: () => void;
+    onGoToDecisionLab: () => void;
+}) {
     const [stage, setStage] = useState<Stage>('idle');
     const [rotation, setRotation] = useState(0);
     const [spin, setSpin] = useState<WheelSpinResult | null>(null);
@@ -66,6 +75,15 @@ export default function WheelExperience({ onExit, onGoToDecisionLab }: { onExit:
 
     return (
         <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col items-center justify-center px-6 py-10">
+            {stage === 'idle' && (
+                <button
+                    onClick={onBack}
+                    className="mb-4 flex w-fit items-center gap-2 self-start text-sm font-semibold text-slate-500 hover:text-slate-700"
+                >
+                    <ArrowLeft className="h-4 w-4" /> Back
+                </button>
+            )}
+
             {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-center text-red-700">{error}</p>}
 
             {(stage === 'idle' || stage === 'spinning') && (

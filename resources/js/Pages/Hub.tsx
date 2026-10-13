@@ -11,6 +11,7 @@ export default function Hub() {
     const [screen, setScreen] = useState<Screen>('attract');
 
     const resetToAttract = useCallback(() => setScreen('attract'), []);
+    const goToChoose = useCallback(() => setScreen('choose'), []);
 
     useIdleReset(resetToAttract, 90_000, screen !== 'attract');
 
@@ -69,9 +70,15 @@ export default function Hub() {
             {screen !== 'attract' && screen !== 'choose' && (
                 <div className="min-h-screen bg-slate-50">
                     {screen === 'wheel' && (
-                        <WheelExperience onExit={resetToAttract} onGoToDecisionLab={() => setScreen('decision_lab')} />
+                        <WheelExperience
+                            onExit={resetToAttract}
+                            onBack={goToChoose}
+                            onGoToDecisionLab={() => setScreen('decision_lab')}
+                        />
                     )}
-                    {screen === 'decision_lab' && <DecisionLabExperience onExit={resetToAttract} />}
+                    {screen === 'decision_lab' && (
+                        <DecisionLabExperience onExit={resetToAttract} onBack={goToChoose} />
+                    )}
                 </div>
             )}
         </div>
