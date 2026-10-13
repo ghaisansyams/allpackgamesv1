@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import TouchButton from '@/Components/Kiosk/TouchButton';
-import GameResultPopup from '@/Components/Kiosk/GameResultPopup';
 import { StopwatchLogo } from '@/Components/Kiosk/GameLogos';
 import { MiniGameApi } from '@/lib/api';
 
@@ -14,20 +13,8 @@ export default function StopwatchExperience({ visitorId, onBack }: { visitorId: 
     const [phase, setPhase] = useState<Phase>('idle');
     const [elapsed, setElapsed] = useState(0);
     const [finalElapsed, setFinalElapsed] = useState<number | null>(null);
-    const [showPopup, setShowPopup] = useState(false);
     const startRef = useRef(0);
     const frameRef = useRef<number>();
-
-    // Hold the result popup back for a beat so the stopped time is actually visible first —
-    // it used to cover the display the instant you hit Stop.
-    useEffect(() => {
-        if (phase !== 'result') {
-            setShowPopup(false);
-            return;
-        }
-        const timer = window.setTimeout(() => setShowPopup(true), 1800);
-        return () => window.clearTimeout(timer);
-    }, [phase]);
 
     useEffect(() => {
         if (phase !== 'running') return;
@@ -80,12 +67,21 @@ export default function StopwatchExperience({ visitorId, onBack }: { visitorId: 
             <h2 className="mb-1 font-display text-3xl font-black uppercase text-white">Stop at 10.00</h2>
             <p className="mb-8 text-center text-slate-300">Tap Start, then Stop the clock as close to exactly 10.00 seconds as you can.</p>
 
-            <div className="mb-10 rounded-3xl border border-amber-400/30 bg-gradient-to-b from-[#1a1430] to-[#0f0a1f] px-10 py-8 shadow-[0_0_50px_rgba(245,158,11,0.2)]">
+            {/* The stopwatch face itself never leaves the screen, and never gets covered by a
+                popup — the result is read straight off it, like a real stopwatch. */}
+            <div className="mb-6 rounded-3xl border border-amber-400/30 bg-gradient-to-b from-[#1a1430] to-[#0f0a1f] px-10 py-8 shadow-[0_0_50px_rgba(245,158,11,0.2)]">
                 <span className="font-display text-6xl font-black tabular-nums text-amber-400 drop-shadow-[0_0_20px_rgba(245,158,11,0.6)]">
                     {(phase === 'result' ? finalElapsed! : elapsed).toFixed(2)}
                 </span>
                 <span className="ml-1 text-2xl text-slate-400">s</span>
             </div>
+
+            {phase === 'result' && (
+                <p className="mb-6 text-center text-slate-300">
+                    {won ? 'Perfect timing!' : finalElapsed! < TARGET_SECONDS ? 'A little too early' : 'A little too late'} —{' '}
+                    {diff!.toFixed(2)}s off target.
+                </p>
+            )}
 
             {phase === 'idle' && <TouchButton onClick={start}>Start</TouchButton>}
             {phase === 'running' && (
@@ -93,19 +89,15 @@ export default function StopwatchExperience({ visitorId, onBack }: { visitorId: 
                     Stop!
                 </TouchButton>
             )}
-
-            {phase === 'result' && showPopup && (
-                <GameResultPopup
-                    won={won}
-                    title={won ? 'Perfect Timing!' : 'So Close!'}
-                    onPlayAgain={playAgain}
-                    onDone={onBack}
-                >
-                    <p>
-                        You stopped at <strong>{finalElapsed!.toFixed(2)}s</strong> — {diff!.toFixed(2)}s{' '}
-                        {finalElapsed! < TARGET_SECONDS ? 'too early' : 'too late'}.
-                    </p>
-                </GameResultPopup>
+            {phase === 'result' && (
+                <div className="flex flex-col items-center gap-3">
+                    <TouchButton variant={won ? 'secondary' : 'ghost'} onClick={playAgain}>
+                        Play Again
+                    </TouchButton>
+                    <button onClick={onBack} className="text-sm font-semibold text-slate-400 underline hover:text-white">
+                        Back
+                    </button>
+                </div>
             )}
         </div>
     );

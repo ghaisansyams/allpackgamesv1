@@ -39,7 +39,7 @@ export default function GameResultPopup({
                         Play Again
                     </TouchButton>
                     <button onClick={onDone} className={`text-sm font-semibold underline ${won ? 'text-amber-950/80' : 'text-slate-400'}`}>
-                        {won ? 'Show This to Our Crew' : 'Done'}
+                        Back
                     </button>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import { DragEvent, useRef, useState } from 'react';
+import { DragEvent, useEffect, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import CountdownBar from '@/Components/Kiosk/CountdownBar';
 import GameResultPopup from '@/Components/Kiosk/GameResultPopup';
@@ -33,6 +33,15 @@ export default function RecycleRushExperience({ visitorId, onBack }: { visitorId
     const [attempt, setAttempt] = useState(0);
     const startedAt = useRef(Date.now());
     const finished = useRef(false);
+
+    // Same reasoning as Memory Match: fetch every image up front so the round-to-round
+    // swaps are instant instead of waiting on a network fetch each time.
+    useEffect(() => {
+        PACKAGING_IMAGES.forEach((image) => {
+            const img = new Image();
+            img.src = image.src;
+        });
+    }, []);
 
     const current = queue[0];
 

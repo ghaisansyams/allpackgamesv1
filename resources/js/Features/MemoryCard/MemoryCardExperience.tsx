@@ -33,6 +33,16 @@ export default function MemoryCardExperience({ visitorId, onBack }: { visitorId:
     const [round, setRound] = useState(0);
     const startedAt = useRef(Date.now());
 
+    // Fetch and decode every card image up front, while all cards are still face-down —
+    // otherwise the first flip of each pair pays for the network fetch itself, which reads
+    // as a laggy reveal on the booth screen.
+    useEffect(() => {
+        PACKAGING_IMAGES.forEach((image) => {
+            const img = new Image();
+            img.src = image.src;
+        });
+    }, []);
+
     const matchedCount = cards.filter((c) => c.matched).length;
 
     useEffect(() => {
