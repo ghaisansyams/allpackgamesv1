@@ -1,28 +1,17 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import { AlertTriangle } from 'lucide-react';
-
-const INDUSTRIES = ['Food & Beverage', 'Pharmaceutical', 'Cosmetic / Personal Care', 'Packaging', 'Manufacturing', 'Other'];
+import CosmicBackground from '@/Components/Kiosk/CosmicBackground';
+import TouchButton from '@/Components/Kiosk/TouchButton';
+import { WheelLogo } from '@/Components/Kiosk/GameLogos';
 
 export default function Join({ token, alreadyClaimed }: { token: string; alreadyClaimed: boolean }) {
-    const [industry, setIndustry] = useState('');
     const form = useForm({
         name: '',
-        company: '',
-        job_title: '',
         contact: '',
-        industry: '',
-        industry_other: '',
     });
 
-    const isValid =
-        form.data.name && form.data.company && form.data.job_title && form.data.contact && industry &&
-        (industry !== 'Other' || form.data.industry_other);
-
-    function selectIndustry(value: string) {
-        setIndustry(value);
-        form.setData('industry', value);
-    }
+    const isValid = form.data.name.trim().length > 0;
 
     function submit(e: FormEvent) {
         e.preventDefault();
@@ -33,27 +22,30 @@ export default function Join({ token, alreadyClaimed }: { token: string; already
 
     if (alreadyClaimed) {
         return (
-            <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-6 text-center">
+            <CosmicBackground>
                 <Head title="ALLPACK — Join" />
-                <AlertTriangle className="h-16 w-16 text-amber-500" strokeWidth={1.5} />
-                <h1 className="text-xl font-black text-slate-900">This QR code has already been used</h1>
-                <p className="text-slate-500">Ask the booth crew to show you a fresh QR code on the screen.</p>
-            </div>
+                <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
+                    <AlertTriangle className="h-16 w-16 text-amber-400" strokeWidth={1.5} />
+                    <h1 className="font-display text-xl font-black uppercase text-white">This QR code has already been used</h1>
+                    <p className="text-slate-300">Ask the booth crew to show you a fresh QR code on the screen.</p>
+                </div>
+            </CosmicBackground>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white px-5 py-8">
+        <CosmicBackground>
             <Head title="ALLPACK 2026 — Join" />
 
-            <div className="mx-auto max-w-md">
-                <div className="mb-6 text-center">
-                    <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">ALLPACK 2026</p>
-                    <h1 className="text-2xl font-black text-slate-900">Let's Get Started!</h1>
-                    <p className="mt-1 text-sm text-slate-500">Fill in your details, then look back at the booth screen.</p>
-                </div>
+            <div className="flex min-h-screen flex-col items-center justify-center px-6 py-10">
+                <WheelLogo className="mb-4 h-20 w-20" />
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">ALLPACK 2026</p>
+                <h1 className="mb-2 text-center font-display text-3xl font-black uppercase text-white">Let's Get Started!</h1>
+                <p className="mb-8 max-w-xs text-center text-sm text-slate-300">
+                    Fill in your details, then look back at the booth screen.
+                </p>
 
-                <form onSubmit={submit} className="space-y-3">
+                <form onSubmit={submit} className="w-full max-w-sm space-y-4">
                     <Field
                         placeholder="Full Name"
                         value={form.data.name}
@@ -61,60 +53,19 @@ export default function Join({ token, alreadyClaimed }: { token: string; already
                         error={form.errors.name}
                     />
                     <Field
-                        placeholder="Company"
-                        value={form.data.company}
-                        onChange={(v) => form.setData('company', v)}
-                        error={form.errors.company}
-                    />
-                    <Field
-                        placeholder="Job Title / Position"
-                        value={form.data.job_title}
-                        onChange={(v) => form.setData('job_title', v)}
-                        error={form.errors.job_title}
-                    />
-                    <Field
-                        placeholder="WhatsApp or Email"
+                        placeholder="Email (optional)"
+                        type="email"
                         value={form.data.contact}
                         onChange={(v) => form.setData('contact', v)}
                         error={form.errors.contact}
                     />
 
-                    <p className="pt-2 text-xs font-bold uppercase tracking-widest text-emerald-700">Industry</p>
-                    <div className="grid grid-cols-2 gap-2">
-                        {INDUSTRIES.map((opt) => (
-                            <button
-                                type="button"
-                                key={opt}
-                                onClick={() => selectIndustry(opt)}
-                                className={`min-h-[52px] rounded-xl border-2 px-3 text-sm font-semibold ${
-                                    industry === opt
-                                        ? 'border-amber-500 bg-amber-50 text-slate-900'
-                                        : 'border-slate-200 bg-white text-slate-600'
-                                }`}
-                            >
-                                {opt}
-                            </button>
-                        ))}
-                    </div>
-
-                    {industry === 'Other' && (
-                        <Field
-                            placeholder="Please specify your industry"
-                            value={form.data.industry_other}
-                            onChange={(v) => form.setData('industry_other', v)}
-                        />
-                    )}
-
-                    <button
-                        type="submit"
-                        disabled={!isValid || form.processing}
-                        className="mt-4 min-h-[56px] w-full rounded-xl bg-emerald-700 text-lg font-bold text-white disabled:opacity-40"
-                    >
+                    <TouchButton type="submit" disabled={!isValid || form.processing} className="mt-2 w-full">
                         {form.processing ? 'Submitting…' : "Let's Play!"}
-                    </button>
+                    </TouchButton>
                 </form>
             </div>
-        </div>
+        </CosmicBackground>
     );
 }
 
@@ -123,21 +74,24 @@ function Field({
     value,
     onChange,
     error,
+    type = 'text',
 }: {
     placeholder: string;
     value: string;
     onChange: (v: string) => void;
     error?: string;
+    type?: string;
 }) {
     return (
         <div>
             <input
+                type={type}
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="min-h-[52px] w-full rounded-xl border-2 border-slate-200 px-4 text-base focus:border-emerald-500 focus:outline-none"
+                className="min-h-[56px] w-full rounded-2xl border border-amber-400/30 bg-white/[0.06] px-5 text-base text-white placeholder:text-slate-400 shadow-xl backdrop-blur-xl focus:border-amber-400/70 focus:outline-none"
             />
-            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+            {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
         </div>
     );
 }

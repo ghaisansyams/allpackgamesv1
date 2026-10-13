@@ -34,11 +34,7 @@ class JoinController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'company' => ['required', 'string', 'max:255'],
-            'job_title' => ['required', 'string', 'max:255'],
-            'contact' => ['required', 'string', 'max:255'],
-            'industry' => ['required', 'string', 'max:255'],
-            'industry_other' => ['nullable', 'string', 'max:255'],
+            'contact' => ['nullable', 'email', 'max:255'],
         ]);
 
         $visitor = Visitor::create($data);
