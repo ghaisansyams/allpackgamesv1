@@ -1,4 +1,4 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { Head } from '@inertiajs/react';
 import DeleteUserForm from './Partials/DeleteUserForm';
@@ -10,34 +10,22 @@ export default function Edit({
     status,
 }: PageProps<{ mustVerifyEmail: boolean; status?: string }>) {
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    Profile
-                </h2>
-            }
-        >
+        <AdminLayout title="Profile">
             <Head title="Profile" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <UpdateProfileInformationForm
-                            mustVerifyEmail={mustVerifyEmail}
-                            status={status}
-                            className="max-w-xl"
-                        />
-                    </div>
+            <div className="space-y-6">
+                <div className="max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} />
+                </div>
 
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <UpdatePasswordForm className="max-w-xl" />
-                    </div>
+                <div className="max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <UpdatePasswordForm />
+                </div>
 
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <DeleteUserForm className="max-w-xl" />
-                    </div>
+                <div className="max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <DeleteUserForm />
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }
