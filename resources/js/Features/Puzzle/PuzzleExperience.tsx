@@ -72,23 +72,23 @@ export default function PuzzleExperience({ visitorId, onBack }: { visitorId: num
     }
 
     return (
-        <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col items-center px-6 py-10">
+        <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center px-6 py-10">
             <button
                 onClick={onBack}
-                className="mb-4 flex w-fit items-center gap-2 self-start text-sm font-semibold text-slate-500 hover:text-slate-700"
+                className="mb-4 flex w-fit items-center gap-2 self-start text-sm font-semibold text-slate-300 hover:text-white"
             >
                 <ArrowLeft className="h-4 w-4" /> Back
             </button>
 
             <Mascot pose="thinking" className="mb-2 h-20" />
-            <h2 className="mb-1 text-3xl font-black text-slate-900">Packaging Puzzle</h2>
-            <p className="mb-4 text-slate-600">Slide the tiles to rebuild the picture.</p>
+            <h2 className="mb-1 font-display text-3xl font-black uppercase text-white">Packaging Puzzle</h2>
+            <p className="mb-4 text-slate-300">Slide the tiles to rebuild the picture.</p>
 
             {outcome === null && <CountdownBar key={round} totalSeconds={TIME_LIMIT} dangerSeconds={20} onExpire={() => finish('lose')} />}
 
-            <p className="mb-4 text-sm font-semibold text-slate-500">Moves: {moves}</p>
+            <p className="mb-4 font-display text-sm font-semibold text-amber-400">Moves: {moves}</p>
 
-            <div className="grid aspect-square w-full max-w-sm grid-cols-3 gap-1.5 rounded-2xl bg-slate-200 p-1.5 shadow-inner">
+            <div className="grid aspect-square w-full max-w-sm grid-cols-3 gap-1.5 rounded-2xl border border-amber-400/30 bg-white/[0.06] p-1.5 shadow-2xl backdrop-blur-xl">
                 {tiles.map((value, position) => {
                     if (value === EMPTY) {
                         return <div key={position} />;
@@ -99,14 +99,14 @@ export default function PuzzleExperience({ visitorId, onBack }: { visitorId: num
                         <button
                             key={position}
                             onClick={() => tapTile(position)}
-                            className="relative overflow-hidden rounded-xl bg-amber-100 shadow transition active:scale-95"
+                            className="relative overflow-hidden rounded-xl border border-amber-300/30 shadow-lg transition active:scale-95"
                             style={{
                                 backgroundImage: `url(${IMAGE})`,
                                 backgroundSize: `${GRID * 100}% ${GRID * 100}%`,
                                 backgroundPosition: `${(col / (GRID - 1)) * 100}% ${(row / (GRID - 1)) * 100}%`,
                             }}
                         >
-                            <span className="absolute bottom-1 right-1.5 text-xs font-black text-white drop-shadow">
+                            <span className="absolute bottom-1 right-1.5 rounded bg-black/50 px-1 text-xs font-black text-amber-300">
                                 {value + 1}
                             </span>
                         </button>

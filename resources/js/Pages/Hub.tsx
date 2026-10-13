@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import { Disc3, Target, Grid3x3, Puzzle, Timer } from 'lucide-react';
 import QrCodeImage from '@/Components/Kiosk/QrCodeImage';
 import Mascot from '@/Components/Kiosk/Mascot';
+import CosmicBackground from '@/Components/Kiosk/CosmicBackground';
 import { useBoothSession } from '@/lib/useBoothSession';
 import { useIdleReset } from '@/lib/useIdleReset';
 import WheelExperience from '@/Features/Wheel/WheelExperience';
@@ -13,19 +14,24 @@ import StopwatchExperience from '@/Features/Stopwatch/StopwatchExperience';
 
 type Screen = 'idle' | 'choose' | 'wheel' | 'decision_lab' | 'memory' | 'puzzle' | 'stopwatch';
 
-const GAMES: { screen: Screen; title: string; tagline: string; icon: typeof Disc3; color: string }[] = [
-    { screen: 'wheel', title: 'Spin the Wheel', tagline: 'SPIN. PLAY. PACK. WIN!', icon: Disc3, color: 'from-purple-600 to-indigo-700' },
-    { screen: 'decision_lab', title: 'Decision Lab', tagline: 'Can you pick the right pack?', icon: Target, color: 'from-emerald-600 to-teal-700' },
-    { screen: 'memory', title: 'Memory Match', tagline: 'Find the matching pairs', icon: Grid3x3, color: 'from-amber-500 to-orange-600' },
-    { screen: 'puzzle', title: 'Packaging Puzzle', tagline: 'Slide it back together', icon: Puzzle, color: 'from-sky-500 to-blue-700' },
-    { screen: 'stopwatch', title: 'Stop at 10.00', tagline: 'Precision wins the prize', icon: Timer, color: 'from-rose-500 to-pink-700' },
+// Temporarily off for trial/testing without a second phone on hand — flip back to true to
+// restore the QR/phone biodata flow. Nothing else needs to change; the booth session plumbing
+// stays wired up underneath either way.
+const QR_JOIN_ENABLED = false;
+
+const GAMES: { screen: Screen; title: string; tagline: string; icon: typeof Disc3 }[] = [
+    { screen: 'wheel', title: 'Spin the Wheel', tagline: 'SPIN. PLAY. PACK. WIN!', icon: Disc3 },
+    { screen: 'decision_lab', title: 'Decision Lab', tagline: 'Can you pick the right pack?', icon: Target },
+    { screen: 'memory', title: 'Memory Match', tagline: 'Find the matching pairs', icon: Grid3x3 },
+    { screen: 'puzzle', title: 'Packaging Puzzle', tagline: 'Slide it back together', icon: Puzzle },
+    { screen: 'stopwatch', title: 'Stop at 10.00', tagline: 'Precision wins the prize', icon: Timer },
 ];
 
 export default function Hub() {
     const [screen, setScreen] = useState<Screen>('idle');
     const [visitorId, setVisitorId] = useState<number | null>(null);
 
-    const { token, visitorId: joinedVisitorId } = useBoothSession(screen === 'idle');
+    const { token, visitorId: joinedVisitorId } = useBoothSession(QR_JOIN_ENABLED && screen === 'idle');
 
     useEffect(() => {
         if (joinedVisitorId) {
@@ -47,27 +53,29 @@ export default function Hub() {
     const joinUrl = token ? `${window.location.origin}/join/${token}` : '';
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900">
+        <CosmicBackground>
             <Head title="ALLPACK 2026 — Interactive Experience Hub" />
 
-            {screen === 'idle' && (
+            {screen === 'idle' && QR_JOIN_ENABLED && (
                 <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 py-10 text-center">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+                    <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
                         ALLPACK 2026 · Interactive Experience Hub
                     </p>
                     <Mascot pose="wave" className="h-36" />
-                    <h1 className="text-4xl font-black leading-tight text-white">
+                    <h1 className="font-display text-5xl font-black uppercase leading-tight text-white drop-shadow-[0_0_30px_rgba(245,158,11,0.4)]">
                         GROWING OUR
                         <br />
-                        TOMORROW
+                        <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">
+                            TOMORROW
+                        </span>
                     </h1>
 
-                    <div className="rounded-3xl bg-white p-4 shadow-2xl">
-                        {token ? <QrCodeImage value={joinUrl} /> : <div className="h-56 w-56 animate-pulse rounded-2xl bg-slate-200" />}
+                    <div className="rounded-3xl border border-white/20 bg-white/10 p-4 shadow-2xl backdrop-blur-xl">
+                        {token ? <QrCodeImage value={joinUrl} /> : <div className="h-56 w-56 animate-pulse rounded-2xl bg-white/10" />}
                     </div>
 
                     <div>
-                        <p className="text-lg font-bold text-amber-400">Scan to Play</p>
+                        <p className="font-display text-lg font-bold text-amber-400">Scan to Play</p>
                         <p className="max-w-xs text-sm text-slate-300">
                             Point your phone camera at the QR code, fill in your details, then look back here.
                         </p>
@@ -75,14 +83,36 @@ export default function Hub() {
                 </div>
             )}
 
+            {screen === 'idle' && !QR_JOIN_ENABLED && (
+                <button
+                    onClick={goToChoose}
+                    className="flex min-h-screen w-full flex-col items-center justify-center gap-6 px-6 py-10 text-center"
+                >
+                    <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+                        ALLPACK 2026 · Interactive Experience Hub
+                    </p>
+                    <Mascot pose="wave" className="h-36" />
+                    <h1 className="font-display text-5xl font-black uppercase leading-tight text-white drop-shadow-[0_0_30px_rgba(245,158,11,0.4)]">
+                        GROWING OUR
+                        <br />
+                        <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">
+                            TOMORROW
+                        </span>
+                    </h1>
+                    <span className="mt-4 animate-pulse rounded-full border border-amber-200/50 bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700 px-10 py-4 font-display text-xl font-bold uppercase tracking-wide text-amber-950 shadow-[0_0_30px_rgba(245,158,11,0.6)]">
+                        Tap to Start
+                    </span>
+                </button>
+            )}
+
             {screen === 'choose' && (
                 <div className="flex min-h-screen flex-col items-center gap-6 px-6 py-10 text-center">
                     <Mascot pose="point" className="h-24" />
                     <div>
-                        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+                        <p className="font-display mb-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
                             Choose Your Game
                         </p>
-                        <h1 className="text-3xl font-black text-white">5 Ways to Play ALLPACK</h1>
+                        <h1 className="font-display text-3xl font-black uppercase text-white">5 Ways to Play ALLPACK</h1>
                     </div>
                     <div className="grid w-full max-w-md grid-cols-1 gap-4 sm:grid-cols-2">
                         {GAMES.map((game) => (
@@ -96,7 +126,7 @@ export default function Hub() {
             )}
 
             {screen !== 'idle' && screen !== 'choose' && (
-                <div className="min-h-screen bg-slate-50">
+                <>
                     {screen === 'wheel' && (
                         <WheelExperience visitorId={visitorId} onExit={resetToIdle} onBack={goToChoose} onGoToDecisionLab={() => setScreen('decision_lab')} />
                     )}
@@ -106,9 +136,9 @@ export default function Hub() {
                     {screen === 'memory' && <MemoryCardExperience visitorId={visitorId} onBack={goToChoose} />}
                     {screen === 'puzzle' && <PuzzleExperience visitorId={visitorId} onBack={goToChoose} />}
                     {screen === 'stopwatch' && <StopwatchExperience visitorId={visitorId} onBack={goToChoose} />}
-                </div>
+                </>
             )}
-        </div>
+        </CosmicBackground>
     );
 }
 
@@ -116,18 +146,20 @@ function GameCard({
     game,
     onClick,
 }: {
-    game: { title: string; tagline: string; icon: typeof Disc3; color: string };
+    game: { title: string; tagline: string; icon: typeof Disc3 };
     onClick: () => void;
 }) {
     const GameIcon = game.icon;
     return (
         <button
             onClick={onClick}
-            className={`flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-3xl bg-gradient-to-br ${game.color} p-6 text-center shadow-2xl transition active:scale-95`}
+            className="group flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-3xl border border-amber-400/20 bg-white/[0.06] p-6 text-center shadow-2xl backdrop-blur-xl transition hover:border-amber-400/60 hover:bg-white/[0.1] hover:shadow-[0_0_30px_rgba(245,158,11,0.35)] active:scale-95"
         >
-            <GameIcon className="h-9 w-9 text-white" />
-            <span className="text-lg font-black text-white">{game.title}</span>
-            <span className="text-xs text-white/80">{game.tagline}</span>
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-300/40 bg-gradient-to-br from-amber-400/20 to-red-600/20">
+                <GameIcon className="h-7 w-7 text-amber-300" />
+            </span>
+            <span className="font-display text-lg font-black uppercase text-white">{game.title}</span>
+            <span className="text-xs text-slate-300">{game.tagline}</span>
         </button>
     );
 }

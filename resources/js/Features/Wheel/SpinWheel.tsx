@@ -1,10 +1,10 @@
-import { Gift } from 'lucide-react';
+import PrizeIcon from '@/Components/Kiosk/PrizeIcon';
 import type { WheelSegmentSummary } from '@/types/content';
 
 const CENTER = 100;
-const RADIUS = 94;
-const IMAGE_RADIUS = 60;
-const IMAGE_SIZE = 32;
+const RADIUS = 92;
+const IMAGE_RADIUS = 58;
+const IMAGE_SIZE = 34;
 const BULB_RADIUS = 97;
 
 /** Point on the wheel at `angleDeg` clockwise from the 12 o'clock position. */
@@ -26,24 +26,50 @@ export default function SpinWheel({
     spinning: boolean;
 }) {
     const segmentAngle = 360 / segments.length;
-    const bulbs = Array.from({ length: 16 }, (_, i) => i);
+    const bulbs = Array.from({ length: 24 }, (_, i) => i);
 
     return (
-        <div className="relative mx-auto h-[min(80vw,480px)] w-[min(80vw,480px)]">
-            <div className="absolute inset-[-8%] -z-10 rounded-full bg-gradient-to-br from-amber-500 via-rose-700 to-indigo-900 opacity-50 blur-2xl" />
+        <div className="relative mx-auto h-[min(92vw,620px)] w-[min(92vw,620px)]">
+            {/* Ambient casino glow behind the whole wheel */}
+            <div className="pointer-events-none absolute inset-[-10%] -z-10 rounded-full bg-gradient-to-br from-amber-400/40 via-red-600/30 to-amber-600/30 blur-[60px]" />
 
-            <div
-                className="absolute left-1/2 top-[-20px] z-20 h-11 w-9 -translate-x-1/2"
-                style={{
-                    clipPath: 'polygon(50% 100%, 10% 0, 90% 0)',
-                    border: '3px solid #f0abfc',
-                    filter: 'drop-shadow(0 0 6px #e879f9) drop-shadow(0 0 12px #c026d3)',
-                }}
-            />
+            {/* Pointer */}
+            <div className="absolute left-1/2 top-[-30px] z-30 -translate-x-1/2">
+                <svg width="56" height="64" viewBox="0 0 56 64">
+                    <defs>
+                        <linearGradient id="pointer-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#fff7cc" />
+                            <stop offset="45%" stopColor="#fbbf24" />
+                            <stop offset="100%" stopColor="#b45309" />
+                        </linearGradient>
+                    </defs>
+                    <path
+                        d="M28 64 L4 18 Q4 2 28 2 Q52 2 52 18 Z"
+                        fill="url(#pointer-gold)"
+                        stroke="#78350f"
+                        strokeWidth="2"
+                        style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.6))' }}
+                    />
+                    <circle cx="28" cy="16" r="6" fill="#dc2626" stroke="#7f1d1d" strokeWidth="1.5" />
+                </svg>
+            </div>
 
-            <svg viewBox="0 0 200 200" className="h-full w-full overflow-visible rounded-full shadow-2xl">
-                <circle cx={CENTER} cy={CENTER} r={RADIUS + 6} fill="#120f26" />
-                <circle cx={CENTER} cy={CENTER} r={RADIUS + 6} fill="none" stroke="#f0abfc" strokeWidth={0.6} opacity={0.5} />
+            <svg viewBox="0 0 200 200" className="h-full w-full overflow-visible rounded-full">
+                {/* Outer ornate gold ring */}
+                <circle cx={CENTER} cy={CENTER} r={RADIUS + 8} fill="none" stroke="#78350f" strokeWidth="3" />
+                <circle cx={CENTER} cy={CENTER} r={RADIUS + 6} fill="url(#rim-gradient)" />
+                <defs>
+                    <linearGradient id="rim-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#fde68a" />
+                        <stop offset="50%" stopColor="#d97706" />
+                        <stop offset="100%" stopColor="#78350f" />
+                    </linearGradient>
+                    <radialGradient id="hub-gradient" cx="35%" cy="30%" r="70%">
+                        <stop offset="0%" stopColor="#fffbeb" />
+                        <stop offset="45%" stopColor="#fbbf24" />
+                        <stop offset="100%" stopColor="#92400e" />
+                    </radialGradient>
+                </defs>
 
                 {bulbs.map((i) => {
                     const angle = i * (360 / bulbs.length);
@@ -53,9 +79,11 @@ export default function SpinWheel({
                             key={`bulb-${i}`}
                             cx={x}
                             cy={y}
-                            r={2.2}
-                            fill="#fdf4ff"
-                            style={{ filter: 'drop-shadow(0 0 3px #f0abfc)' }}
+                            r={2.6}
+                            fill={i % 2 === 0 ? '#fef08a' : '#fde047'}
+                            stroke="#78350f"
+                            strokeWidth="0.5"
+                            style={{ filter: 'drop-shadow(0 0 4px #fde047)' }}
                             className={spinning ? 'animate-pulse' : ''}
                         />
                     );
@@ -77,9 +105,25 @@ export default function SpinWheel({
                             <path
                                 key={segment.id}
                                 d={d}
-                                fill={isWin ? '#d97706' : i % 2 === 0 ? '#3b2f63' : '#2a2550'}
-                                stroke="#1a1533"
-                                strokeWidth={1}
+                                fill={isWin ? '#fbbf24' : i % 2 === 0 ? '#b91c1c' : '#7f1d1d'}
+                                stroke="#fde68a"
+                                strokeWidth="1"
+                            />
+                        );
+                    })}
+                    {/* Thin gold divider lines between wedges, circus-wheel style */}
+                    {segments.map((_, i) => {
+                        const p = polar(RADIUS, i * segmentAngle);
+                        return (
+                            <line
+                                key={`divider-${i}`}
+                                x1={CENTER}
+                                y1={CENTER}
+                                x2={p.x}
+                                y2={p.y}
+                                stroke="#fde68a"
+                                strokeWidth="1.5"
+                                opacity="0.8"
                             />
                         );
                     })}
@@ -97,26 +141,30 @@ export default function SpinWheel({
                                 style={{ overflow: 'visible' }}
                             >
                                 {isWin ? (
-                                    <Gift
-                                        className="h-full w-full text-amber-100"
-                                        style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))' }}
-                                    />
+                                    <PrizeIcon className="h-full w-full" />
                                 ) : (
                                     <img
                                         src="/images/wheel/bomb.png"
                                         alt=""
                                         className="h-full w-full object-contain"
-                                        style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))' }}
+                                        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.7))' }}
                                     />
                                 )}
                             </foreignObject>
                         );
                     })}
                 </g>
+
+                {/* Hub */}
+                <circle cx={CENTER} cy={CENTER} r={20} fill="url(#hub-gradient)" stroke="#78350f" strokeWidth="2" />
+                <circle cx={CENTER} cy={CENTER} r={20} fill="none" stroke="#fde68a" strokeWidth="1" opacity="0.8" />
             </svg>
 
-            <div className="absolute inset-0 m-auto flex h-[22%] w-[22%] items-center justify-center rounded-full bg-gradient-to-b from-white to-slate-200 text-sm font-black text-indigo-900 shadow-[0_0_20px_rgba(240,171,252,0.6)]">
-                SPIN
+            <div
+                className="absolute inset-0 m-auto flex h-[20%] w-[20%] items-center justify-center font-display text-sm font-black uppercase tracking-wider text-red-900"
+                style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}
+            >
+                Spin
             </div>
         </div>
     );

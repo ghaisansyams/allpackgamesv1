@@ -9,10 +9,15 @@ export default {
         './resources/js/**/*.tsx',
     ],
 
-    // No custom web font is loaded: the booth runs on a LAN with no internet access, so the
-    // theme relies on the OS's bundled system sans-serif stack (Tailwind's default `font-sans`).
+    // `display` is self-hosted (public/fonts/orbitron.woff2, see resources/css/app.css) rather
+    // than pulled from a Google Fonts CDN, so it still works with no internet at the booth.
+    // Body text keeps Tailwind's default system-font `font-sans` for readability.
     theme: {
-        extend: {},
+        extend: {
+            fontFamily: {
+                display: ['Orbitron', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+        },
     },
 
     plugins: [forms],

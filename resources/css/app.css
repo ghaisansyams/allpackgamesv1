@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Self-hosted (not a Google Fonts CDN call) so the booth works with no internet. A single
+   variable-font file covers the 400-900 weight range used for display/heading text. */
+@font-face {
+    font-family: 'Orbitron';
+    font-style: normal;
+    font-weight: 400 900;
+    font-display: swap;
+    src: url('/fonts/orbitron.woff2') format('woff2');
+}

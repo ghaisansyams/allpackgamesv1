@@ -39,15 +39,17 @@ export default function CountdownBar({
     return (
         <div className="mx-auto mb-6 w-full max-w-3xl">
             <div className="mb-1 flex items-center justify-between text-xs font-semibold">
-                <span className="uppercase tracking-widest text-slate-500">Time Remaining</span>
-                <span className={danger ? 'animate-pulse text-red-600' : 'text-slate-600'}>
+                <span className="uppercase tracking-widest text-slate-400">Time Remaining</span>
+                <span className={`font-display tabular-nums ${danger ? 'animate-pulse text-red-400' : 'text-amber-300'}`}>
                     {minutes}:{seconds.toString().padStart(2, '0')}
                 </span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/10">
                 <div
                     className={`h-full rounded-full transition-all duration-1000 ease-linear ${
-                        danger ? 'bg-red-600' : 'bg-emerald-600'
+                        danger
+                            ? 'bg-gradient-to-r from-red-500 to-rose-600 shadow-[0_0_10px_rgba(239,68,68,0.8)]'
+                            : 'bg-gradient-to-r from-amber-400 to-amber-600 shadow-[0_0_10px_rgba(245,158,11,0.6)]'
                     }`}
                     style={{ width: `${percent}%` }}
                 />

@@ -90,21 +90,21 @@ export default function MemoryCardExperience({ visitorId, onBack }: { visitorId:
     }
 
     return (
-        <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col items-center px-6 py-10">
+        <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center px-6 py-10">
             <button
                 onClick={onBack}
-                className="mb-4 flex w-fit items-center gap-2 self-start text-sm font-semibold text-slate-500 hover:text-slate-700"
+                className="mb-4 flex w-fit items-center gap-2 self-start text-sm font-semibold text-slate-300 hover:text-white"
             >
                 <ArrowLeft className="h-4 w-4" /> Back
             </button>
 
             <Mascot pose="point" className="mb-2 h-20" />
-            <h2 className="mb-1 text-3xl font-black text-slate-900">Memory Match</h2>
-            <p className="mb-4 text-slate-600">Find all 6 packaging pairs before time runs out!</p>
+            <h2 className="mb-1 font-display text-3xl font-black uppercase text-white">Memory Match</h2>
+            <p className="mb-4 text-slate-300">Find all 6 packaging pairs before time runs out!</p>
 
             {outcome === null && <CountdownBar key={round} totalSeconds={TIME_LIMIT} dangerSeconds={15} onExpire={() => finish('lose')} />}
 
-            <p className="mb-4 text-sm font-semibold text-slate-500">Moves: {moves}</p>
+            <p className="mb-4 font-display text-sm font-semibold text-amber-400">Moves: {moves}</p>
 
             <div className="grid w-full grid-cols-4 gap-3">
                 {cards.map((card) => {
@@ -115,12 +115,12 @@ export default function MemoryCardExperience({ visitorId, onBack }: { visitorId:
                             key={card.key}
                             onClick={() => flipCard(card.key)}
                             disabled={revealed}
-                            className={`flex aspect-square items-center justify-center rounded-2xl text-2xl font-black shadow transition active:scale-95 ${
+                            className={`flex aspect-square items-center justify-center rounded-2xl border text-2xl font-black shadow-lg transition active:scale-95 ${
                                 card.matched
-                                    ? 'bg-emerald-100 text-emerald-700'
+                                    ? 'border-amber-400/50 bg-amber-400/15 text-amber-300'
                                     : revealed
-                                      ? 'bg-white text-indigo-700'
-                                      : 'bg-gradient-to-br from-indigo-600 to-purple-700'
+                                      ? 'border-amber-300/40 bg-white text-red-700'
+                                      : 'border-red-400/30 bg-gradient-to-br from-red-700 to-red-900 shadow-[0_0_14px_rgba(220,38,38,0.4)]'
                             }`}
                         >
                             {revealed && <Icon className="h-8 w-8" />}

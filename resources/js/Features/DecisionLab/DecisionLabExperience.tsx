@@ -173,34 +173,34 @@ export default function DecisionLabExperience({
 
     if (stage === 'loading' || !content) {
         return (
-            <div className="flex min-h-full flex-col items-center justify-center gap-4">
+            <div className="flex min-h-screen flex-col items-center justify-center gap-4">
                 <Mascot pose="thinking" className="h-24" />
-                <p className="text-xl text-slate-500">{error ?? 'Loading experience…'}</p>
+                <p className="text-xl text-slate-300">{error ?? 'Loading experience…'}</p>
             </div>
         );
     }
 
     return (
-        <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col justify-center px-6 py-10">
+        <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-6 py-10">
             {stage !== 'result' && (
                 <button
                     onClick={onBack}
-                    className="mb-4 flex w-fit items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
+                    className="mb-4 flex w-fit items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white"
                 >
                     <ArrowLeft className="h-4 w-4" /> Back
                 </button>
             )}
 
             {error && (
-                <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-center text-red-700">{error}</p>
+                <p className="mb-4 rounded-xl border border-red-500/30 bg-red-950/50 px-4 py-3 text-center text-red-300">{error}</p>
             )}
 
             {stage !== 'result' && <CountdownBar totalSeconds={180} dangerSeconds={25} />}
 
             {stage === 'start' && (
-                <div className="mx-auto max-w-2xl rounded-3xl bg-slate-900 p-10 text-center text-white shadow-2xl">
+                <div className="mx-auto max-w-2xl rounded-3xl border border-amber-400/20 bg-white/[0.06] p-10 text-center shadow-2xl backdrop-blur-xl">
                     <Mascot pose="point" className="mx-auto mb-4 h-28" />
-                    <h2 className="text-3xl font-black">What Kind of Packaging Challenge Can You Solve?</h2>
+                    <h2 className="font-display text-3xl font-black uppercase text-white">What Kind of Packaging Challenge Can You Solve?</h2>
                     <p className="mt-3 text-slate-300">You have approximately 2–3 minutes to make your decision.</p>
                     <TouchButton className="mt-8" onClick={() => setStage('business_case')}>
                         ▶ Start Challenge
@@ -220,7 +220,7 @@ export default function DecisionLabExperience({
                                 selected={businessCase?.id === bc.id}
                                 onClick={() => handleBusinessCaseSelect(bc)}
                             >
-                                <Icon name={bc.icon} className="h-9 w-9 text-emerald-700" />
+                                <Icon name={bc.icon} className="h-9 w-9 text-amber-400" />
                             </SelectCard>
                         ))}
                     </div>
@@ -264,9 +264,9 @@ export default function DecisionLabExperience({
                                     onClick={() => togglePriority(p.slug)}
                                 >
                                     <div className="flex w-full items-center justify-between">
-                                        <Icon name={p.icon} className="h-9 w-9 text-emerald-700" />
+                                        <Icon name={p.icon} className="h-9 w-9 text-amber-400" />
                                         {rank !== -1 && (
-                                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-slate-900">
+                                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-b from-amber-300 to-amber-600 text-sm font-bold text-amber-950 shadow-[0_0_10px_rgba(245,158,11,0.6)]">
                                                 {rank + 1}
                                             </span>
                                         )}
@@ -288,18 +288,23 @@ export default function DecisionLabExperience({
                     <StepHeader step={4} total={5} title="Make Your Packaging Decision" />
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         {options.map((option, i) => (
-                            <div key={option.id} className="flex flex-col gap-4 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow">
-                                <img
-                                    src={OPTION_IMAGES[i % OPTION_IMAGES.length]}
-                                    alt=""
-                                    className="h-40 w-full object-contain"
-                                />
+                            <div
+                                key={option.id}
+                                className="flex flex-col gap-4 rounded-2xl border border-amber-400/20 bg-white/[0.06] p-5 shadow-2xl backdrop-blur-xl"
+                            >
+                                <div className="rounded-xl bg-white/90 p-3">
+                                    <img
+                                        src={OPTION_IMAGES[i % OPTION_IMAGES.length]}
+                                        alt=""
+                                        className="h-36 w-full object-contain"
+                                    />
+                                </div>
                                 <div>
-                                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-700 font-bold text-white">
+                                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-b from-amber-300 to-amber-600 font-bold text-amber-950 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
                                         {String.fromCharCode(65 + i)}
                                     </span>
-                                    <p className="mt-2 font-bold text-slate-900">{option.label}</p>
-                                    <p className="text-sm text-slate-600">{option.description}</p>
+                                    <p className="mt-2 font-display font-bold text-white">{option.label}</p>
+                                    <p className="text-sm text-slate-300">{option.description}</p>
                                 </div>
                                 <TouchButton
                                     variant="secondary"
