@@ -4,10 +4,10 @@ import TouchButton from '@/Components/Kiosk/TouchButton';
 import StepHeader from '@/Components/Kiosk/StepHeader';
 import SelectCard from '@/Components/Kiosk/SelectCard';
 import CountdownBar from '@/Components/Kiosk/CountdownBar';
+import Mascot from '@/Components/Kiosk/Mascot';
 import Icon from '@/lib/icons';
-import { ContentApi, DecisionSessionApi, VisitorApi } from '@/lib/api';
+import { ContentApi, DecisionSessionApi } from '@/lib/api';
 import { clearPersistedState, loadPersistedState, savePersistedState } from '@/lib/sessionPersistence';
-import VisitorDataStage, { VisitorFormData } from './VisitorDataStage';
 import ResultStage from './ResultStage';
 import type {
     BusinessCase,
@@ -19,7 +19,7 @@ import type {
     PrioritySlug,
 } from '@/types/content';
 
-type Stage = 'loading' | 'visitor' | 'start' | 'business_case' | 'market' | 'priorities' | 'decision' | 'result';
+type Stage = 'loading' | 'start' | 'business_case' | 'market' | 'priorities' | 'decision' | 'result';
 
 // Generic packaging product cutouts, assigned by option position (A/B/C) rather than by
 // business case content — a placeholder visual treatment until case-specific photography exists.
@@ -29,7 +29,6 @@ const STORAGE_KEY = 'allpack.decision-lab.v1';
 
 interface PersistedState {
     stage: Stage;
-    visitorId: number | null;
     sessionId: number | null;
     businessCase: BusinessCase | null;
     market: Market | null;
@@ -38,13 +37,20 @@ interface PersistedState {
     result: DecisionResult | null;
 }
 
-export default function DecisionLabExperience({ onExit, onBack }: { onExit: () => void; onBack: () => void }) {
+export default function DecisionLabExperience({
+    visitorId,
+    onExit,
+    onBack,
+}: {
+    visitorId: number | null;
+    onExit: () => void;
+    onBack: () => void;
+}) {
     const [stage, setStage] = useState<Stage>('loading');
     const [content, setContent] = useState<DecisionLabContent | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [visitorId, setVisitorId] = useState<number | null>(null);
     const [sessionId, setSessionId] = useState<number | null>(null);
     const [businessCase, setBusinessCase] = useState<BusinessCase | null>(null);
     const [market, setMarket] = useState<Market | null>(null);
@@ -57,22 +63,22 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
     const restoredRef = useRef(false);
 
     useEffect(() => {
-        ContentApi.decisionLab()
-            .then((data) => {
+        Promise.all([ContentApi.decisionLab(), DecisionSessionApi.create(visitorId ?? undefined)])
+            .then(([data, session]) => {
                 setContent(data);
 
                 const persisted = loadPersistedState<PersistedState>(STORAGE_KEY);
                 if (persisted && persisted.stage !== 'loading') {
                     setStage(persisted.stage);
-                    setVisitorId(persisted.visitorId);
-                    setSessionId(persisted.sessionId);
+                    setSessionId(persisted.sessionId ?? session.id);
                     setBusinessCase(persisted.businessCase);
                     setMarket(persisted.market);
                     setPriorities(persisted.priorities);
                     setOptions(persisted.options);
                     setResult(persisted.result);
                 } else {
-                    setStage('visitor');
+                    setSessionId(session.id);
+                    setStage('start');
                 }
                 restoredRef.current = true;
             })
@@ -85,7 +91,6 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
         }
         savePersistedState<PersistedState>(STORAGE_KEY, {
             stage,
-            visitorId,
             sessionId,
             businessCase,
             market,
@@ -93,7 +98,7 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
             options,
             result,
         });
-    }, [stage, visitorId, sessionId, businessCase, market, priorities, options, result]);
+    }, [stage, sessionId, businessCase, market, priorities, options, result]);
 
     // A deliberate exit (back button, finishing the flow, idle timeout unmounting this
     // component) clears the saved progress so the next visitor never resumes a stranger's
@@ -102,22 +107,6 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
     useEffect(() => {
         return () => clearPersistedState(STORAGE_KEY);
     }, []);
-
-    async function handleVisitorSubmit(form: VisitorFormData) {
-        setSubmitting(true);
-        setError(null);
-        try {
-            const visitor = await VisitorApi.create(form);
-            const session = await DecisionSessionApi.create(visitor.id);
-            setVisitorId(visitor.id);
-            setSessionId(session.id);
-            setStage('start');
-        } catch {
-            setError('Something went wrong saving your details. Please try again.');
-        } finally {
-            setSubmitting(false);
-        }
-    }
 
     async function handleBusinessCaseSelect(bc: BusinessCase) {
         if (!sessionId) return;
@@ -179,19 +168,16 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
     }
 
     function restart() {
-        setStage('visitor');
-        setVisitorId(null);
-        setSessionId(null);
-        setBusinessCase(null);
-        setMarket(null);
-        setPriorities([]);
-        setOptions(null);
-        setResult(null);
         onExit();
     }
 
     if (stage === 'loading' || !content) {
-        return <CenteredMessage text={error ?? 'Loading experience…'} />;
+        return (
+            <div className="flex min-h-full flex-col items-center justify-center gap-4">
+                <Mascot pose="thinking" className="h-24" />
+                <p className="text-xl text-slate-500">{error ?? 'Loading experience…'}</p>
+            </div>
+        );
     }
 
     return (
@@ -209,14 +195,11 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
                 <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-center text-red-700">{error}</p>
             )}
 
-            {stage !== 'visitor' && stage !== 'result' && <CountdownBar totalSeconds={180} dangerSeconds={25} />}
-
-            {stage === 'visitor' && (
-                <VisitorDataStage onSubmit={handleVisitorSubmit} submitting={submitting} />
-            )}
+            {stage !== 'result' && <CountdownBar totalSeconds={180} dangerSeconds={25} />}
 
             {stage === 'start' && (
                 <div className="mx-auto max-w-2xl rounded-3xl bg-slate-900 p-10 text-center text-white shadow-2xl">
+                    <Mascot pose="point" className="mx-auto mb-4 h-28" />
                     <h2 className="text-3xl font-black">What Kind of Packaging Challenge Can You Solve?</h2>
                     <p className="mt-3 text-slate-300">You have approximately 2–3 minutes to make your decision.</p>
                     <TouchButton className="mt-8" onClick={() => setStage('business_case')}>
@@ -227,7 +210,7 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
 
             {stage === 'business_case' && (
                 <div>
-                    <StepHeader step={3} total={7} title="Choose Your Business Case" />
+                    <StepHeader step={1} total={5} title="Choose Your Business Case" />
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {content.business_cases.map((bc) => (
                             <SelectCard
@@ -246,7 +229,7 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
 
             {stage === 'market' && (
                 <div>
-                    <StepHeader step={4} total={7} title="Define Your Market" />
+                    <StepHeader step={2} total={5} title="Define Your Market" />
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {content.markets.map((m) => (
                             <SelectCard
@@ -264,8 +247,8 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
             {stage === 'priorities' && (
                 <div>
                     <StepHeader
-                        step={5}
-                        total={7}
+                        step={3}
+                        total={5}
                         title="Set Your Top 3 Priorities"
                         subtitle="Tap in order of importance — do not rank all six."
                     />
@@ -302,7 +285,7 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
 
             {stage === 'decision' && options && (
                 <div>
-                    <StepHeader step={6} total={7} title="Make Your Packaging Decision" />
+                    <StepHeader step={4} total={5} title="Make Your Packaging Decision" />
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         {options.map((option, i) => (
                             <div key={option.id} className="flex flex-col gap-4 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow">
@@ -340,14 +323,6 @@ export default function DecisionLabExperience({ onExit, onBack }: { onExit: () =
                     onRestart={restart}
                 />
             )}
-        </div>
-    );
-}
-
-function CenteredMessage({ text }: { text: string }) {
-    return (
-        <div className="flex min-h-full items-center justify-center">
-            <p className="text-xl text-slate-500">{text}</p>
         </div>
     );
 }

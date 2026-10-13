@@ -1,14 +1,10 @@
-const SLOT_COUNT = 8;
-
-// Muted dark-neon alternating palette (two tones) purely for visual appeal — every wedge
-// shows the identical mystery box image regardless of color, so color carries no
-// information about the outcome.
-const COLORS = ['#3b2f63', '#2a2550'];
+import { Gift } from 'lucide-react';
+import type { WheelSegmentSummary } from '@/types/content';
 
 const CENTER = 100;
 const RADIUS = 94;
 const IMAGE_RADIUS = 60;
-const IMAGE_SIZE = 30;
+const IMAGE_SIZE = 32;
 const BULB_RADIUS = 97;
 
 /** Point on the wheel at `angleDeg` clockwise from the 12 o'clock position. */
@@ -20,20 +16,26 @@ function polar(radius: number, angleDeg: number) {
     };
 }
 
-export default function SpinWheel({ rotation, spinning }: { rotation: number; spinning: boolean }) {
-    const segmentAngle = 360 / SLOT_COUNT;
-    const slots = Array.from({ length: SLOT_COUNT }, (_, i) => i);
+export default function SpinWheel({
+    segments,
+    rotation,
+    spinning,
+}: {
+    segments: WheelSegmentSummary[];
+    rotation: number;
+    spinning: boolean;
+}) {
+    const segmentAngle = 360 / segments.length;
     const bulbs = Array.from({ length: 16 }, (_, i) => i);
 
     return (
         <div className="relative mx-auto h-[min(80vw,480px)] w-[min(80vw,480px)]">
-            <div className="absolute inset-[-8%] -z-10 rounded-full bg-gradient-to-br from-fuchsia-600 via-purple-700 to-indigo-900 opacity-50 blur-2xl" />
+            <div className="absolute inset-[-8%] -z-10 rounded-full bg-gradient-to-br from-amber-500 via-rose-700 to-indigo-900 opacity-50 blur-2xl" />
 
             <div
                 className="absolute left-1/2 top-[-20px] z-20 h-11 w-9 -translate-x-1/2"
                 style={{
                     clipPath: 'polygon(50% 100%, 10% 0, 90% 0)',
-                    background: 'transparent',
                     border: '3px solid #f0abfc',
                     filter: 'drop-shadow(0 0 6px #e879f9) drop-shadow(0 0 12px #c026d3)',
                 }}
@@ -66,25 +68,48 @@ export default function SpinWheel({ rotation, spinning }: { rotation: number; sp
                         transition: spinning ? 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : undefined,
                     }}
                 >
-                    {slots.map((i) => {
+                    {segments.map((segment, i) => {
                         const start = polar(RADIUS, i * segmentAngle);
                         const end = polar(RADIUS, (i + 1) * segmentAngle);
                         const d = `M ${CENTER} ${CENTER} L ${start.x} ${start.y} A ${RADIUS} ${RADIUS} 0 0 1 ${end.x} ${end.y} Z`;
-                        return <path key={i} d={d} fill={COLORS[i % COLORS.length]} stroke="#1a1533" strokeWidth={1} />;
+                        const isWin = segment.outcome === 'win';
+                        return (
+                            <path
+                                key={segment.id}
+                                d={d}
+                                fill={isWin ? '#d97706' : i % 2 === 0 ? '#3b2f63' : '#2a2550'}
+                                stroke="#1a1533"
+                                strokeWidth={1}
+                            />
+                        );
                     })}
-                    {slots.map((i) => {
+                    {segments.map((segment, i) => {
                         const mid = i * segmentAngle + segmentAngle / 2;
                         const { x, y } = polar(IMAGE_RADIUS, mid);
+                        const isWin = segment.outcome === 'win';
                         return (
-                            <image
-                                key={`img-${i}`}
-                                href="/images/wheel/mystery-box.png"
+                            <foreignObject
+                                key={`icon-${segment.id}`}
                                 x={x - IMAGE_SIZE / 2}
                                 y={y - IMAGE_SIZE / 2}
                                 width={IMAGE_SIZE}
                                 height={IMAGE_SIZE}
-                                style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))' }}
-                            />
+                                style={{ overflow: 'visible' }}
+                            >
+                                {isWin ? (
+                                    <Gift
+                                        className="h-full w-full text-amber-100"
+                                        style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))' }}
+                                    />
+                                ) : (
+                                    <img
+                                        src="/images/wheel/bomb.png"
+                                        alt=""
+                                        className="h-full w-full object-contain"
+                                        style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))' }}
+                                    />
+                                )}
+                            </foreignObject>
                         );
                     })}
                 </g>

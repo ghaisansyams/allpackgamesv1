@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Visitor;
 use App\Models\WheelSegment;
+use App\Models\WheelSpin;
 use Database\Seeders\ContentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -28,7 +30,18 @@ class DigitalWheelTest extends TestCase
 
         $this->assertContains($spin['outcome'], ['win', 'bomb']);
         $this->assertNotEmpty($spin['message']);
+        $this->assertIsInt($spin['sort_order']);
         $this->assertDatabaseHas('wheel_spins', ['id' => $spin['id']]);
+    }
+
+    public function test_wheel_content_exposes_every_wedge_since_outcomes_are_shown_on_the_wheel_face(): void
+    {
+        $this->seed(ContentSeeder::class);
+
+        $segments = $this->getJson('/api/content/wheel')->assertOk()->json('segments');
+
+        $this->assertCount(8, $segments);
+        $this->assertCount(1, collect($segments)->where('outcome', 'win'));
     }
 
     public function test_spinning_many_times_can_land_on_both_outcomes(): void
@@ -45,17 +58,30 @@ class DigitalWheelTest extends TestCase
         $this->assertTrue($outcomes->contains('bomb'));
     }
 
-    public function test_handoff_without_an_existing_visitor_creates_a_lead(): void
+    public function test_spin_is_attributed_to_the_visitor_from_the_booth_session(): void
     {
         $this->seed(ContentSeeder::class);
 
-        $spin = $this->postJson('/api/wheel/spins', [])->assertCreated()->json('spin');
+        $visitor = Visitor::factory()->create();
 
-        $response = $this->postJson("/api/wheel/spins/{$spin['id']}/handoff", [
-            'name' => 'Rina',
-            'contact' => 'rina@foodco.com',
-        ])->assertOk();
+        $spin = $this->postJson('/api/wheel/spins', ['visitor_id' => $visitor->id])
+            ->assertCreated()->json('spin');
 
-        $this->assertNotNull($response->json('visitor_id'));
+        $this->assertDatabaseHas('wheel_spins', ['id' => $spin['id'], 'visitor_id' => $visitor->id]);
+    }
+
+    public function test_handoff_marks_that_the_visitor_asked_to_talk_to_the_team(): void
+    {
+        $this->seed(ContentSeeder::class);
+
+        $visitor = Visitor::factory()->create();
+        $spin = $this->postJson('/api/wheel/spins', ['visitor_id' => $visitor->id])
+            ->assertCreated()->json('spin');
+
+        $this->postJson("/api/wheel/spins/{$spin['id']}/handoff", ['visitor_id' => $visitor->id])
+            ->assertOk();
+
+        $this->assertDatabaseHas('wheel_spins', ['id' => $spin['id'], 'visitor_id' => $visitor->id]);
+        $this->assertNotNull(WheelSpin::find($spin['id'])->handoff_requested_at);
     }
 }

@@ -12,6 +12,7 @@
         "@tailwindcss/forms": "^0.5.3",
         "@tailwindcss/vite": "^4.0.0",
         "@types/node": "^22.12.0",
+        "@types/qrcode": "^1.5.6",
         "@types/react": "^18.0.28",
         "@types/react-dom": "^18.0.10",
         "@vitejs/plugin-react": "^6.1.2",
@@ -30,6 +31,10 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
-        "lucide-react": "^1.55.0"
+        "@laravel/echo-react": "^2.6.1",
+        "laravel-echo": "^2.6.1",
+        "lucide-react": "^1.55.0",
+        "pusher-js": "^8.6.0",
+        "qrcode": "^1.5.4"
     }
 }

@@ -8,17 +8,27 @@ import { useEffect, useState } from 'react';
 export default function CountdownBar({
     totalSeconds = 180,
     dangerSeconds = 25,
+    onExpire,
 }: {
     totalSeconds?: number;
     dangerSeconds?: number;
+    onExpire?: () => void;
 }) {
     const [remaining, setRemaining] = useState(totalSeconds);
 
     useEffect(() => {
         const interval = window.setInterval(() => {
-            setRemaining((prev) => Math.max(0, prev - 1));
+            setRemaining((prev) => {
+                if (prev <= 1) {
+                    window.clearInterval(interval);
+                    onExpire?.();
+                    return 0;
+                }
+                return prev - 1;
+            });
         }, 1000);
         return () => window.clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const percent = Math.max(0, (remaining / totalSeconds) * 100);

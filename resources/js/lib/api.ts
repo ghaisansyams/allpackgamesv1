@@ -2,7 +2,7 @@ import type {
     DecisionLabContent,
     DecisionResult,
     DecisionSession,
-    Visitor,
+    WheelContent,
     WheelSpinResult,
     PackagingOptionChoice,
 } from '@/types/content';
@@ -11,17 +11,16 @@ const api = () => window.axios;
 
 export const ContentApi = {
     decisionLab: () => api().get<DecisionLabContent>('/api/content/decision-lab').then((r) => r.data),
+    wheel: () => api().get<WheelContent>('/api/content/wheel').then((r) => r.data),
 };
 
-export const VisitorApi = {
-    create: (data: {
-        name: string;
-        company: string;
-        job_title: string;
-        contact: string;
-        industry: string;
-        industry_other?: string;
-    }) => api().post<{ visitor: Visitor }>('/api/visitors', data).then((r) => r.data.visitor),
+export const BoothSessionApi = {
+    create: () => api().post<{ token: string }>('/api/booth-sessions').then((r) => r.data.token),
+
+    status: (token: string) =>
+        api()
+            .get<{ status: 'waiting' | 'claimed'; visitor_id: number | null }>(`/api/booth-sessions/${token}`)
+            .then((r) => r.data),
 };
 
 export const DecisionSessionApi = {
@@ -58,14 +57,17 @@ export const DecisionSessionApi = {
             })),
 };
 
+export const MiniGameApi = {
+    record: (game: 'memory_card' | 'puzzle' | 'stopwatch', won: boolean, visitorId?: number | null, meta?: Record<string, unknown>) =>
+        api().post('/api/mini-game-attempts', { game, won, visitor_id: visitorId, meta }),
+};
+
 export const WheelApi = {
-    spin: (visitorId?: number) =>
+    spin: (visitorId?: number | null) =>
         api()
             .post<{ spin: WheelSpinResult }>('/api/wheel/spins', { visitor_id: visitorId })
             .then((r) => r.data.spin),
 
-    handoff: (
-        spinId: number,
-        data: { visitor_id?: number; name?: string; company?: string; job_title?: string; contact?: string; industry?: string },
-    ) => api().post(`/api/wheel/spins/${spinId}/handoff`, data),
+    handoff: (spinId: number, visitorId?: number | null) =>
+        api().post(`/api/wheel/spins/${spinId}/handoff`, { visitor_id: visitorId }),
 };

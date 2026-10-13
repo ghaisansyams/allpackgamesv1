@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Visitor;
 use App\Models\WheelSpin;
 use App\Services\WheelSpinService;
 use Illuminate\Http\JsonResponse;
@@ -29,6 +28,10 @@ class WheelSpinController extends Controller
         return response()->json([
             'spin' => [
                 'id' => $spin->id,
+                // The wedge position the wheel must land on — now that bomb/prize are shown
+                // directly on the wheel face, the visual landing must match the real outcome,
+                // so the frontend needs to know exactly which physical wedge this is.
+                'sort_order' => $segment->sort_order,
                 'outcome' => $segment->outcome,
                 'reward_label' => $segment->reward_label,
                 'message' => $segment->message,
@@ -36,35 +39,21 @@ class WheelSpinController extends Controller
         ], 201);
     }
 
+    /**
+     * The visitor is already known from the QR/phone join flow by the time anyone spins, so
+     * this just records that they asked to talk to the team — no second data form needed.
+     */
     public function handoff(Request $request, WheelSpin $wheelSpin): JsonResponse
     {
         $data = $request->validate([
             'visitor_id' => ['nullable', 'exists:visitors,id'],
-            'name' => ['required_without:visitor_id', 'nullable', 'string', 'max:255'],
-            'company' => ['nullable', 'string', 'max:255'],
-            'job_title' => ['nullable', 'string', 'max:255'],
-            'contact' => ['required_without:visitor_id', 'nullable', 'string', 'max:255'],
-            'industry' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $visitorId = $data['visitor_id'] ?? null;
-
-        if (! $visitorId && $wheelSpin->visitor_id === null) {
-            $visitor = Visitor::create([
-                'name' => $data['name'],
-                'company' => $data['company'] ?? '-',
-                'job_title' => $data['job_title'] ?? '-',
-                'contact' => $data['contact'],
-                'industry' => $data['industry'] ?? '-',
-            ]);
-            $visitorId = $visitor->id;
-        }
-
         $wheelSpin->update([
-            'visitor_id' => $visitorId ?? $wheelSpin->visitor_id,
+            'visitor_id' => $data['visitor_id'] ?? $wheelSpin->visitor_id,
             'handoff_requested_at' => now(),
         ]);
 
-        return response()->json(['status' => 'ok', 'visitor_id' => $wheelSpin->fresh()->visitor_id]);
+        return response()->json(['status' => 'ok']);
     }
 }
