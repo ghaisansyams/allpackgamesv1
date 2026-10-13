@@ -47,7 +47,7 @@ RUN rm -f bootstrap/cache/*.php \
 # showing off the booth game UI, not meant to hold real exhibition data.
 RUN cp .env.example .env \
     && php artisan key:generate --force \
-    && sed -i 's#^SESSION_DRIVER=.*#SESSION_DRIVER=array#' .env \
+    && sed -i 's#^SESSION_DRIVER=.*#SESSION_DRIVER=cookie#' .env \
     && sed -i 's#^CACHE_STORE=.*#CACHE_STORE=array#' .env \
     && sed -i 's#^QUEUE_CONNECTION=.*#QUEUE_CONNECTION=sync#' .env \
     && sed -i 's#^BROADCAST_CONNECTION=.*#BROADCAST_CONNECTION=log#' .env \
@@ -69,7 +69,7 @@ ENV PORT=80 \
     APP_DEBUG=false \
     LOG_CHANNEL=stderr \
     CACHE_STORE=array \
-    SESSION_DRIVER=array \
+    SESSION_DRIVER=cookie \
     QUEUE_CONNECTION=sync \
     BROADCAST_CONNECTION=log \
     DB_CONNECTION=sqlite
