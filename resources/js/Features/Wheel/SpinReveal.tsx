@@ -30,13 +30,22 @@ export default function SpinReveal({
                 }`}
             >
                 {isWin ? (
-                    <PrizeIcon className="mx-auto mb-2 h-20 w-20 animate-bounce" />
+                    <>
+                        <PrizeIcon className="mx-auto mb-2 h-20 w-20 animate-bounce" />
+                        <h2 className="mb-3 font-display text-2xl font-black uppercase tracking-wide text-amber-950">
+                            {spin.reward_label ?? 'You Won!'}
+                        </h2>
+                    </>
                 ) : (
-                    <img src="/images/wheel/bomb.png" alt="" className="mx-auto mb-2 h-24 w-24 object-contain" />
+                    <>
+                        {/* "BOOM" is the headline here, not the bomb art — it leads, the icon
+                            follows as supporting visual. */}
+                        <h2 className="mb-2 font-display text-4xl font-black uppercase tracking-wide text-amber-400 drop-shadow-[0_0_20px_rgba(245,158,11,0.5)]">
+                            Boom!
+                        </h2>
+                        <img src="/images/wheel/bomb.png" alt="" className="mx-auto mb-3 h-20 w-20 object-contain" />
+                    </>
                 )}
-                <h2 className={`mb-3 font-display text-2xl font-black uppercase tracking-wide ${isWin ? 'text-amber-950' : 'text-amber-400'}`}>
-                    {isWin ? (spin.reward_label ?? 'You Won!') : 'Boom!'}
-                </h2>
                 <p className={isWin ? 'text-amber-950/90' : 'text-slate-300'}>{spin.message}</p>
 
                 <div className="mt-6 flex flex-col gap-3">
