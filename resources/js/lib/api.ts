@@ -58,12 +58,7 @@ export const DecisionSessionApi = {
 };
 
 export const MiniGameApi = {
-    record: (
-        game: 'memory_card' | 'puzzle' | 'stopwatch' | 'packaging_rush',
-        won: boolean,
-        visitorId?: number | null,
-        meta?: Record<string, unknown>,
-    ) =>
+    record: (game: 'memory_card' | 'puzzle' | 'stopwatch', won: boolean, visitorId?: number | null, meta?: Record<string, unknown>) =>
         api().post('/api/mini-game-attempts', { game, won, visitor_id: visitorId, meta }),
 };
 

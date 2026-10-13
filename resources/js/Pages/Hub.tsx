@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import QrCodeImage from '@/Components/Kiosk/QrCodeImage';
 import CosmicBackground from '@/Components/Kiosk/CosmicBackground';
-import { WheelLogo, DecisionLogo, MemoryLogo, PuzzleLogo, StopwatchLogo, RushLogo } from '@/Components/Kiosk/GameLogos';
+import { WheelLogo, DecisionLogo, MemoryLogo, PuzzleLogo, StopwatchLogo } from '@/Components/Kiosk/GameLogos';
 import { useBoothSession } from '@/lib/useBoothSession';
 import { useIdleReset } from '@/lib/useIdleReset';
 import WheelExperience from '@/Features/Wheel/WheelExperience';
@@ -10,9 +10,8 @@ import DecisionLabExperience from '@/Features/DecisionLab/DecisionLabExperience'
 import MemoryCardExperience from '@/Features/MemoryCard/MemoryCardExperience';
 import PuzzleExperience from '@/Features/Puzzle/PuzzleExperience';
 import StopwatchExperience from '@/Features/Stopwatch/StopwatchExperience';
-import PackagingRushExperience from '@/Features/PackagingRush/PackagingRushExperience';
 
-type Screen = 'idle' | 'choose' | 'wheel' | 'decision_lab' | 'memory' | 'puzzle' | 'stopwatch' | 'packaging_rush';
+type Screen = 'idle' | 'choose' | 'wheel' | 'decision_lab' | 'memory' | 'puzzle' | 'stopwatch';
 
 // Temporarily off for trial/testing without a second phone on hand — flip back to true to
 // restore the QR/phone biodata flow. Nothing else needs to change; the booth session plumbing
@@ -27,7 +26,6 @@ const GAMES: { screen: Screen; title: string; tagline: string; Logo: LogoCompone
     { screen: 'memory', title: 'Memory Match', tagline: 'Find the matching pairs', Logo: MemoryLogo },
     { screen: 'puzzle', title: 'Packaging Puzzle', tagline: 'Slide it back together', Logo: PuzzleLogo },
     { screen: 'stopwatch', title: 'Stop at 10.00', tagline: 'Precision wins the prize', Logo: StopwatchLogo },
-    { screen: 'packaging_rush', title: 'Packaging Rush', tagline: 'Tap the right pack, fast!', Logo: RushLogo },
 ];
 
 export default function Hub() {
@@ -138,7 +136,6 @@ export default function Hub() {
                     {screen === 'memory' && <MemoryCardExperience visitorId={visitorId} onBack={goToChoose} />}
                     {screen === 'puzzle' && <PuzzleExperience visitorId={visitorId} onBack={goToChoose} />}
                     {screen === 'stopwatch' && <StopwatchExperience visitorId={visitorId} onBack={goToChoose} />}
-                    {screen === 'packaging_rush' && <PackagingRushExperience visitorId={visitorId} onBack={goToChoose} />}
                 </>
             )}
         </CosmicBackground>
