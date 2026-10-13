@@ -11,12 +11,10 @@ type Stage = 'loading' | 'idle' | 'spinning' | 'revealed';
 
 export default function WheelExperience({
     visitorId,
-    onExit,
     onBack,
     onGoToDecisionLab,
 }: {
     visitorId: number | null;
-    onExit: () => void;
     onBack: () => void;
     onGoToDecisionLab: () => void;
 }) {
@@ -122,10 +120,6 @@ export default function WheelExperience({
                     onBack={() => {
                         closeReveal();
                         onBack();
-                    }}
-                    onDone={() => {
-                        closeReveal();
-                        onExit();
                     }}
                 />
             )}

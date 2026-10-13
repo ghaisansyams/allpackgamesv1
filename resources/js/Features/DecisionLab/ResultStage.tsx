@@ -6,12 +6,12 @@ export default function ResultStage({
     result,
     onSendEmail,
     onTalkToExpert,
-    onRestart,
+    onBack,
 }: {
     result: DecisionResult;
     onSendEmail: () => Promise<{ ok: boolean; message?: string }>;
     onTalkToExpert: () => Promise<{ ok: boolean; message?: string }>;
-    onRestart: () => void;
+    onBack: () => void;
 }) {
     const [emailSent, setEmailSent] = useState(false);
     const [expertRequested, setExpertRequested] = useState(false);
@@ -87,8 +87,8 @@ export default function ResultStage({
             )}
 
             <div className="mt-6 text-center">
-                <button onClick={onRestart} className="text-slate-400 underline hover:text-slate-200">
-                    Start a new session
+                <button onClick={onBack} className="text-slate-400 underline hover:text-slate-200">
+                    Choose Another Game
                 </button>
             </div>
         </div>

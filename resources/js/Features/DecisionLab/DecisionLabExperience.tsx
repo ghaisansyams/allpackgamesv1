@@ -39,11 +39,9 @@ interface PersistedState {
 
 export default function DecisionLabExperience({
     visitorId,
-    onExit,
     onBack,
 }: {
     visitorId: number | null;
-    onExit: () => void;
     onBack: () => void;
 }) {
     const [stage, setStage] = useState<Stage>('loading');
@@ -167,9 +165,6 @@ export default function DecisionLabExperience({
         }
     }
 
-    function restart() {
-        onExit();
-    }
 
     if (stage === 'loading' || !content) {
         return (
@@ -325,7 +320,7 @@ export default function DecisionLabExperience({
                     result={result}
                     onSendEmail={() => DecisionSessionApi.handoff(sessionId, 'email')}
                     onTalkToExpert={() => DecisionSessionApi.handoff(sessionId, 'expert')}
-                    onRestart={restart}
+                    onBack={onBack}
                 />
             )}
         </div>

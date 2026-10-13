@@ -136,11 +136,9 @@ export default function Hub() {
             {screen !== 'idle' && screen !== 'choose' && (
                 <>
                     {screen === 'wheel' && (
-                        <WheelExperience visitorId={visitorId} onExit={resetToIdle} onBack={goToChoose} onGoToDecisionLab={() => setScreen('decision_lab')} />
+                        <WheelExperience visitorId={visitorId} onBack={goToChoose} onGoToDecisionLab={() => setScreen('decision_lab')} />
                     )}
-                    {screen === 'decision_lab' && (
-                        <DecisionLabExperience visitorId={visitorId} onExit={resetToIdle} onBack={goToChoose} />
-                    )}
+                    {screen === 'decision_lab' && <DecisionLabExperience visitorId={visitorId} onBack={goToChoose} />}
                     {screen === 'memory' && <MemoryCardExperience visitorId={visitorId} onBack={goToChoose} />}
                     {screen === 'puzzle' && <PuzzleExperience visitorId={visitorId} onBack={goToChoose} />}
                     {screen === 'stopwatch' && <StopwatchExperience visitorId={visitorId} onBack={goToChoose} />}
