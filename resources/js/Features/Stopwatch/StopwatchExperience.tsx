@@ -51,6 +51,21 @@ export default function StopwatchExperience({ visitorId, onBack }: { visitorId: 
         setPhase('idle');
     }
 
+    // Space doubles as Start/Stop — handy on a keyboard-equipped setup (or for testing),
+    // on top of tapping the on-screen button. Re-subscribes on every phase change so the
+    // listener always checks the current phase rather than a stale one.
+    useEffect(() => {
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.code !== 'Space') return;
+            e.preventDefault();
+            if (phase === 'idle') start();
+            else if (phase === 'running') stop();
+        }
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [phase]);
+
     const won = finalElapsed !== null && Math.abs(finalElapsed - TARGET_SECONDS) <= WIN_TOLERANCE;
     const diff = finalElapsed !== null ? Math.abs(finalElapsed - TARGET_SECONDS) : null;
 
@@ -65,7 +80,9 @@ export default function StopwatchExperience({ visitorId, onBack }: { visitorId: 
 
             <StopwatchLogo className={`mb-2 h-20 w-20 ${phase === 'running' ? 'animate-pulse' : ''}`} />
             <h2 className="mb-1 font-display text-3xl font-black uppercase text-white">Stop at 10.00</h2>
-            <p className="mb-8 text-center text-slate-300">Tap Start, then Stop the clock as close to exactly 10.00 seconds as you can.</p>
+            <p className="mb-8 text-center text-slate-300">
+                Tap Start (or press Space), then Stop the clock as close to exactly 10.00 seconds as you can.
+            </p>
 
             {/* The stopwatch face itself never leaves the screen, and never gets covered by a
                 popup — the result is read straight off it, like a real stopwatch. */}
