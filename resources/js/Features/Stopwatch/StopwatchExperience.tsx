@@ -9,7 +9,15 @@ const WIN_TOLERANCE = 0.15;
 
 type Phase = 'idle' | 'running' | 'result';
 
-export default function StopwatchExperience({ visitorId, onBack }: { visitorId: number | null; onBack: () => void }) {
+export default function StopwatchExperience({
+    visitorId,
+    onBack,
+    onResult,
+}: {
+    visitorId: number | null;
+    onBack: () => void;
+    onResult?: (attempt: { elapsed: number; won: boolean }) => void;
+}) {
     const [phase, setPhase] = useState<Phase>('idle');
     const [elapsed, setElapsed] = useState(0);
     const [finalElapsed, setFinalElapsed] = useState<number | null>(null);
@@ -43,6 +51,7 @@ export default function StopwatchExperience({ visitorId, onBack }: { visitorId: 
 
         const won = Math.abs(final - TARGET_SECONDS) <= WIN_TOLERANCE;
         MiniGameApi.record('stopwatch', won, visitorId, { stopped_at: Number(final.toFixed(3)) });
+        onResult?.({ elapsed: final, won });
     }
 
     function playAgain() {

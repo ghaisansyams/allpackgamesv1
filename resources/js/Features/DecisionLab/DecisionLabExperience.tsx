@@ -40,9 +40,11 @@ interface PersistedState {
 export default function DecisionLabExperience({
     visitorId,
     onBack,
+    onResult,
 }: {
     visitorId: number | null;
     onBack: () => void;
+    onResult?: (result: DecisionResult) => void;
 }) {
     const [stage, setStage] = useState<Stage>('loading');
     const [content, setContent] = useState<DecisionLabContent | null>(null);
@@ -158,6 +160,7 @@ export default function DecisionLabExperience({
             const { result: decisionResult } = await DecisionSessionApi.decide(sessionId, optionId);
             setResult(decisionResult);
             setStage('result');
+            onResult?.(decisionResult);
         } catch {
             setError('Unable to compute your result. Please try again.');
         } finally {
@@ -190,7 +193,7 @@ export default function DecisionLabExperience({
                 <p className="mb-4 rounded-xl border border-red-500/30 bg-red-950/50 px-4 py-3 text-center text-red-300">{error}</p>
             )}
 
-            {stage !== 'result' && <CountdownBar totalSeconds={180} dangerSeconds={25} />}
+            {stage !== 'start' && stage !== 'result' && <CountdownBar totalSeconds={180} dangerSeconds={25} />}
 
             {stage === 'start' && (
                 <div className="mx-auto max-w-2xl rounded-3xl border border-amber-400/20 bg-white/[0.06] p-10 text-center shadow-2xl backdrop-blur-xl">

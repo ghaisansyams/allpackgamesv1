@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import QrCodeImage from '@/Components/Kiosk/QrCodeImage';
+import TouchButton from '@/Components/Kiosk/TouchButton';
 import CosmicBackground from '@/Components/Kiosk/CosmicBackground';
 import LeaderboardPanel from '@/Components/Kiosk/LeaderboardPanel';
 import { WheelLogo, DecisionLogo, MemoryLogo, PuzzleLogo, StopwatchLogo, SpotMissingLogo } from '@/Components/Kiosk/GameLogos';
@@ -12,8 +13,11 @@ import MemoryCardExperience from '@/Features/MemoryCard/MemoryCardExperience';
 import PuzzleExperience from '@/Features/Puzzle/PuzzleExperience';
 import StopwatchExperience from '@/Features/Stopwatch/StopwatchExperience';
 import SpotMissingExperience from '@/Features/SpotMissing/SpotMissingExperience';
+import type { DecisionResult } from '@/types/content';
 
-type Screen = 'idle' | 'choose' | 'wheel' | 'decision_lab' | 'memory' | 'puzzle' | 'stopwatch' | 'spot_missing';
+type Screen = 'idle' | 'choose' | 'wheel' | 'decision_lab' | 'memory' | 'puzzle' | 'stopwatch' | 'spot_missing' | 'summary';
+
+type StopwatchBest = { elapsed: number; won: boolean };
 
 // Visitors scan this to fill their details on their own phone, then get bounced back here
 // automatically — needs two requests (booth creates the session, phone claims it) to land on
@@ -38,6 +42,11 @@ export default function Hub() {
     const [screen, setScreen] = useState<Screen>('idle');
     const [visitorId, setVisitorId] = useState<number | null>(null);
 
+    // Best result per game played this visit, surfaced on the end-of-visit summary screen
+    // instead of a mid-game popup — only the games actually played show up there.
+    const [stopwatchBest, setStopwatchBest] = useState<StopwatchBest | null>(null);
+    const [decisionLabResult, setDecisionLabResult] = useState<DecisionResult | null>(null);
+
     const { token, visitorId: joinedVisitorId } = useBoothSession(QR_JOIN_ENABLED && screen === 'idle');
 
     useEffect(() => {
@@ -50,7 +59,21 @@ export default function Hub() {
     const goToChoose = useCallback(() => setScreen('choose'), []);
     const resetToIdle = useCallback(() => {
         setVisitorId(null);
+        setStopwatchBest(null);
+        setDecisionLabResult(null);
         setScreen('idle');
+    }, []);
+
+    const finishVisit = useCallback(() => {
+        if (stopwatchBest || decisionLabResult) {
+            setScreen('summary');
+        } else {
+            resetToIdle();
+        }
+    }, [stopwatchBest, decisionLabResult, resetToIdle]);
+
+    const recordStopwatchAttempt = useCallback((attempt: StopwatchBest) => {
+        setStopwatchBest((prev) => (prev && Math.abs(prev.elapsed - 10) <= Math.abs(attempt.elapsed - 10) ? prev : attempt));
     }, []);
 
     // An abandoned session (visitor walked off mid-game) shouldn't block the booth for the
@@ -135,21 +158,57 @@ export default function Hub() {
                             <GameCard key={game.screen} game={game} onClick={() => setScreen(game.screen)} />
                         ))}
                     </div>
-                    <button onClick={resetToIdle} className="mt-2 text-sm text-slate-400 underline">
+                    <button onClick={finishVisit} className="mt-2 text-sm text-slate-400 underline">
                         I'm Done — Next Guest
                     </button>
                 </div>
             )}
 
-            {screen !== 'idle' && screen !== 'choose' && (
+            {screen === 'summary' && (
+                <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 py-10 text-center">
+                    <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">Your Results</p>
+                    <h1 className="font-display text-3xl font-black uppercase text-white">Great Playing With Us!</h1>
+
+                    <div className="flex w-full max-w-md flex-col gap-4">
+                        {decisionLabResult && (
+                            <div className="rounded-3xl border border-amber-400/20 bg-white/[0.06] p-6 text-left shadow-2xl backdrop-blur-xl">
+                                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Decision Lab</p>
+                                <p className="mt-1 font-display text-4xl font-black text-amber-400">
+                                    {decisionLabResult.fit_score}
+                                    <span className="text-lg text-slate-400"> / 100</span>
+                                </p>
+                                <p className="text-sm text-slate-300">{decisionLabResult.solution_label}</p>
+                            </div>
+                        )}
+
+                        {stopwatchBest && (
+                            <div className="rounded-3xl border border-amber-400/20 bg-white/[0.06] p-6 text-left shadow-2xl backdrop-blur-xl">
+                                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Stop at 10.00 — Best Try</p>
+                                <p className="mt-1 font-display text-4xl font-black text-amber-400">{stopwatchBest.elapsed.toFixed(2)}s</p>
+                                <p className="text-sm text-slate-300">
+                                    {stopwatchBest.won ? 'Perfect timing!' : `${Math.abs(stopwatchBest.elapsed - 10).toFixed(2)}s off target`}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    <TouchButton onClick={resetToIdle}>Selesai — Tamu Berikutnya</TouchButton>
+                </div>
+            )}
+
+            {screen !== 'idle' && screen !== 'choose' && screen !== 'summary' && (
                 <>
                     {screen === 'wheel' && (
                         <WheelExperience visitorId={visitorId} onBack={goToChoose} onGoToDecisionLab={() => setScreen('decision_lab')} />
                     )}
-                    {screen === 'decision_lab' && <DecisionLabExperience visitorId={visitorId} onBack={goToChoose} />}
+                    {screen === 'decision_lab' && (
+                        <DecisionLabExperience visitorId={visitorId} onBack={goToChoose} onResult={setDecisionLabResult} />
+                    )}
                     {screen === 'memory' && <MemoryCardExperience visitorId={visitorId} onBack={goToChoose} />}
                     {screen === 'puzzle' && <PuzzleExperience visitorId={visitorId} onBack={goToChoose} />}
-                    {screen === 'stopwatch' && <StopwatchExperience visitorId={visitorId} onBack={goToChoose} />}
+                    {screen === 'stopwatch' && (
+                        <StopwatchExperience visitorId={visitorId} onBack={goToChoose} onResult={recordStopwatchAttempt} />
+                    )}
                     {screen === 'spot_missing' && <SpotMissingExperience visitorId={visitorId} onBack={goToChoose} />}
                 </>
             )}
