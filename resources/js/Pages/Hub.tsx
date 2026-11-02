@@ -4,18 +4,16 @@ import QrCodeImage from '@/Components/Kiosk/QrCodeImage';
 import TouchButton from '@/Components/Kiosk/TouchButton';
 import CosmicBackground from '@/Components/Kiosk/CosmicBackground';
 import LeaderboardPanel from '@/Components/Kiosk/LeaderboardPanel';
-import { WheelLogo, DecisionLogo, MemoryLogo, PuzzleLogo, StopwatchLogo, SpotMissingLogo } from '@/Components/Kiosk/GameLogos';
+import { WheelLogo, MemoryLogo, PuzzleLogo, StopwatchLogo, SpotMissingLogo } from '@/Components/Kiosk/GameLogos';
 import { useBoothSession } from '@/lib/useBoothSession';
 import { useIdleReset } from '@/lib/useIdleReset';
 import WheelExperience from '@/Features/Wheel/WheelExperience';
-import DecisionLabExperience from '@/Features/DecisionLab/DecisionLabExperience';
 import MemoryCardExperience from '@/Features/MemoryCard/MemoryCardExperience';
 import PuzzleExperience from '@/Features/Puzzle/PuzzleExperience';
 import StopwatchExperience from '@/Features/Stopwatch/StopwatchExperience';
 import SpotMissingExperience from '@/Features/SpotMissing/SpotMissingExperience';
-import type { DecisionResult } from '@/types/content';
 
-type Screen = 'idle' | 'choose' | 'wheel' | 'decision_lab' | 'memory' | 'puzzle' | 'stopwatch' | 'spot_missing' | 'summary';
+type Screen = 'idle' | 'choose' | 'wheel' | 'memory' | 'puzzle' | 'stopwatch' | 'spot_missing' | 'summary';
 
 type StopwatchBest = { elapsed: number; won: boolean };
 
@@ -31,7 +29,6 @@ type LogoComponent = (props: { className?: string }) => JSX.Element;
 
 const GAMES: { screen: Screen; title: string; tagline: string; Logo: LogoComponent }[] = [
     { screen: 'wheel', title: 'Spin the Wheel', tagline: 'SPIN. PLAY. PACK. WIN!', Logo: WheelLogo },
-    { screen: 'decision_lab', title: 'Decision Lab', tagline: 'Can you pick the right pack?', Logo: DecisionLogo },
     { screen: 'memory', title: 'Memory Match', tagline: 'Find the matching pairs', Logo: MemoryLogo },
     { screen: 'puzzle', title: 'Packaging Puzzle', tagline: 'Slide it back together', Logo: PuzzleLogo },
     { screen: 'stopwatch', title: 'Stop at 10.00', tagline: 'Precision wins the prize', Logo: StopwatchLogo },
@@ -45,7 +42,6 @@ export default function Hub() {
     // Best result per game played this visit, surfaced on the end-of-visit summary screen
     // instead of a mid-game popup — only the games actually played show up there.
     const [stopwatchBest, setStopwatchBest] = useState<StopwatchBest | null>(null);
-    const [decisionLabResult, setDecisionLabResult] = useState<DecisionResult | null>(null);
 
     const { token, visitorId: joinedVisitorId } = useBoothSession(QR_JOIN_ENABLED && screen === 'idle');
 
@@ -60,17 +56,16 @@ export default function Hub() {
     const resetToIdle = useCallback(() => {
         setVisitorId(null);
         setStopwatchBest(null);
-        setDecisionLabResult(null);
         setScreen('idle');
     }, []);
 
     const finishVisit = useCallback(() => {
-        if (stopwatchBest || decisionLabResult) {
+        if (stopwatchBest) {
             setScreen('summary');
         } else {
             resetToIdle();
         }
-    }, [stopwatchBest, decisionLabResult, resetToIdle]);
+    }, [stopwatchBest, resetToIdle]);
 
     const recordStopwatchAttempt = useCallback((attempt: StopwatchBest) => {
         setStopwatchBest((prev) => (prev && Math.abs(prev.elapsed - 10) <= Math.abs(attempt.elapsed - 10) ? prev : attempt));
@@ -170,17 +165,6 @@ export default function Hub() {
                     <h1 className="font-display text-3xl font-black uppercase text-white">Great Playing With Us!</h1>
 
                     <div className="flex w-full max-w-md flex-col gap-4">
-                        {decisionLabResult && (
-                            <div className="rounded-3xl border border-amber-400/20 bg-white/[0.06] p-6 text-left shadow-2xl backdrop-blur-xl">
-                                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Decision Lab</p>
-                                <p className="mt-1 font-display text-4xl font-black text-amber-400">
-                                    {decisionLabResult.fit_score}
-                                    <span className="text-lg text-slate-400"> / 100</span>
-                                </p>
-                                <p className="text-sm text-slate-300">{decisionLabResult.solution_label}</p>
-                            </div>
-                        )}
-
                         {stopwatchBest && (
                             <div className="rounded-3xl border border-amber-400/20 bg-white/[0.06] p-6 text-left shadow-2xl backdrop-blur-xl">
                                 <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Stop at 10.00 — Best Try</p>
@@ -199,10 +183,7 @@ export default function Hub() {
             {screen !== 'idle' && screen !== 'choose' && screen !== 'summary' && (
                 <>
                     {screen === 'wheel' && (
-                        <WheelExperience visitorId={visitorId} onBack={goToChoose} onGoToDecisionLab={() => setScreen('decision_lab')} />
-                    )}
-                    {screen === 'decision_lab' && (
-                        <DecisionLabExperience visitorId={visitorId} onBack={goToChoose} onResult={setDecisionLabResult} />
+                        <WheelExperience visitorId={visitorId} onBack={goToChoose} />
                     )}
                     {screen === 'memory' && <MemoryCardExperience visitorId={visitorId} onBack={goToChoose} />}
                     {screen === 'puzzle' && <PuzzleExperience visitorId={visitorId} onBack={goToChoose} />}

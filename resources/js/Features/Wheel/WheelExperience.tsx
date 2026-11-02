@@ -12,11 +12,9 @@ type Stage = 'loading' | 'idle' | 'spinning' | 'revealed';
 export default function WheelExperience({
     visitorId,
     onBack,
-    onGoToDecisionLab,
 }: {
     visitorId: number | null;
     onBack: () => void;
-    onGoToDecisionLab: () => void;
 }) {
     const [stage, setStage] = useState<Stage>('loading');
     const [segments, setSegments] = useState<WheelSegmentSummary[]>([]);
@@ -103,11 +101,6 @@ export default function WheelExperience({
                 <TouchButton className="mt-10" disabled={stage === 'spinning'} onClick={handleSpin}>
                     {stage === 'spinning' ? 'Spinning…' : 'Spin Now'}
                 </TouchButton>
-                <div className="mt-4">
-                    <button onClick={onGoToDecisionLab} className="text-sm text-slate-400 underline hover:text-slate-200">
-                        Try Packaging Decision Lab instead
-                    </button>
-                </div>
             </div>
 
             {stage === 'revealed' && spin && (
